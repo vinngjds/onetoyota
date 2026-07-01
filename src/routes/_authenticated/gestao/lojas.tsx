@@ -18,6 +18,7 @@ function GestaoLojas() {
   const qc = useQueryClient();
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
+  const [region, setRegion] = useState("");
 
   const storesQ = useQuery({
     queryKey: ["gestao-stores"],
