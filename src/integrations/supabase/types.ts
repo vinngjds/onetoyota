@@ -205,18 +205,24 @@ export type Database = {
         Row: {
           id: string
           indicator_id: string
+          period_month: number | null
+          period_year: number | null
           store_id: string
           target: number
         }
         Insert: {
           id?: string
           indicator_id: string
+          period_month?: number | null
+          period_year?: number | null
           store_id: string
           target: number
         }
         Update: {
           id?: string
           indicator_id?: string
+          period_month?: number | null
+          period_year?: number | null
           store_id?: string
           target?: number
         }

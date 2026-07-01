@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, Pencil, Check, X } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/gestao/indicadores")({
@@ -61,6 +61,18 @@ function GestaoIndicadores() {
       setForm({ ...form, name: "", max_points: "0", default_target: "", subgroup: "" });
       qc.invalidateQueries({ queryKey: ["gestao-indicadores"] });
       toast.success("Indicador criado");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const update = useMutation({
+    mutationFn: async (p: { id: string; patch: any }) => {
+      const { error } = await supabase.from("indicators").update(p.patch).eq("id", p.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["gestao-indicadores"] });
+      toast.success("Indicador atualizado");
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -145,26 +157,21 @@ function GestaoIndicadores() {
                   <th className="py-2 text-right">Pontuação</th>
                   <th className="py-2 text-right">Meta padrão</th>
                   <th className="py-2">Tipo</th>
-                  <th className="py-2 w-10"></th>
+                  <th className="py-2 text-right pr-3">Ordem</th>
+                  <th className="py-2 w-24"></th>
                 </tr>
               </thead>
               <tbody>
                 {list.map((i) => (
-                  <tr key={i.id} className="border-b last:border-b-0">
-                    <td className="px-5 py-2 text-slate-600">{i.subgroup ?? "-"}</td>
-                    <td className="py-2 font-medium">{i.name}</td>
-                    <td className="py-2 text-right">{Number(i.max_points).toFixed(2)}</td>
-                    <td className="py-2 text-right">{i.default_target ?? "-"}</td>
-                    <td className="py-2 text-xs text-slate-500">{i.unit}</td>
-                    <td className="py-2">
-                      <Button variant="ghost" size="sm" onClick={() => confirm("Remover indicador?") && del.mutate(i.id)}>
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </Button>
-                    </td>
-                  </tr>
+                  <IndicatorRow
+                    key={i.id}
+                    indicator={i}
+                    onSave={(patch) => update.mutate({ id: i.id, patch })}
+                    onDelete={() => del.mutate(i.id)}
+                  />
                 ))}
                 {list.length === 0 && (
-                  <tr><td colSpan={6} className="px-5 py-4 text-center text-slate-400 text-sm">Sem indicadores.</td></tr>
+                  <tr><td colSpan={7} className="px-5 py-4 text-center text-slate-400 text-sm">Sem indicadores.</td></tr>
                 )}
               </tbody>
             </table>
@@ -172,5 +179,85 @@ function GestaoIndicadores() {
         );
       })}
     </div>
+  );
+}
+
+function IndicatorRow({ indicator, onSave, onDelete }: { indicator: any; onSave: (patch: any) => void; onDelete: () => void }) {
+  const [editing, setEditing] = useState(false);
+  const [f, setF] = useState({
+    subgroup: indicator.subgroup ?? "",
+    name: indicator.name,
+    max_points: String(indicator.max_points),
+    default_target: indicator.default_target != null ? String(indicator.default_target) : "",
+    unit: indicator.unit,
+    sort_order: String(indicator.sort_order),
+  });
+
+  if (editing) {
+    return (
+      <tr className="border-b bg-slate-50/60">
+        <td className="px-5 py-2">
+          <Input className="h-8" value={f.subgroup} onChange={(e) => setF({ ...f, subgroup: e.target.value })} />
+        </td>
+        <td className="py-2">
+          <Input className="h-8" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
+        </td>
+        <td className="py-2">
+          <Input className="h-8 text-right" type="number" step="any" value={f.max_points} onChange={(e) => setF({ ...f, max_points: e.target.value })} />
+        </td>
+        <td className="py-2">
+          <Input className="h-8 text-right" type="number" step="any" value={f.default_target} onChange={(e) => setF({ ...f, default_target: e.target.value })} />
+        </td>
+        <td className="py-2">
+          <Select value={f.unit} onValueChange={(v) => setF({ ...f, unit: v })}>
+            <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {UNITS.map((u) => <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </td>
+        <td className="py-2">
+          <Input className="h-8 text-right" type="number" value={f.sort_order} onChange={(e) => setF({ ...f, sort_order: e.target.value })} />
+        </td>
+        <td className="py-2">
+          <div className="flex justify-end gap-1">
+            <Button size="sm" variant="ghost" onClick={() => { setEditing(false); onSave({
+              subgroup: f.subgroup || null,
+              name: f.name,
+              max_points: Number(f.max_points),
+              default_target: f.default_target === "" ? null : Number(f.default_target),
+              unit: f.unit,
+              sort_order: Number(f.sort_order),
+            }); }}>
+              <Check className="w-4 h-4 text-green-600" />
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        </td>
+      </tr>
+    );
+  }
+
+  return (
+    <tr className="border-b last:border-b-0">
+      <td className="px-5 py-2 text-slate-600">{indicator.subgroup ?? "-"}</td>
+      <td className="py-2 font-medium">{indicator.name}</td>
+      <td className="py-2 text-right">{Number(indicator.max_points).toFixed(2)}</td>
+      <td className="py-2 text-right">{indicator.default_target ?? "-"}</td>
+      <td className="py-2 text-xs text-slate-500">{indicator.unit}</td>
+      <td className="py-2 text-right pr-3 text-slate-500">{indicator.sort_order}</td>
+      <td className="py-2">
+        <div className="flex justify-end gap-1">
+          <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
+            <Pencil className="w-4 h-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => confirm("Remover indicador?") && onDelete()}>
+            <Trash2 className="w-4 h-4 text-red-500" />
+          </Button>
+        </div>
+      </td>
+    </tr>
   );
 }

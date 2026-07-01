@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePeriod, useSelectedStoreId } from "@/lib/session";
 import { Card } from "@/components/ui/card";
 import { Shield, TrendingUp, Users, Package, ArrowRight } from "lucide-react";
-import { pointsFrom, effectiveTarget, classifyScore, type Indicator } from "@/lib/scoring";
+import { pointsFrom, resolveTarget, classifyScore, type Indicator, type TargetRow } from "@/lib/scoring";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: Dashboard,
@@ -58,7 +58,6 @@ function Dashboard() {
   }
 
   const { modules, indicators, targets, entries, bands } = dataQ.data;
-  const targetMap = new Map(targets.map((t) => [t.indicator_id, Number(t.target)]));
   const entryMap = new Map(entries.map((e) => [e.indicator_id, e]));
 
   let grandReal = 0;
@@ -69,7 +68,7 @@ function Dashboard() {
     const inds = indicators.filter((i) => i.module_id === m.id);
     let real = 0, proj = 0, max = 0;
     inds.forEach((ind) => {
-      const t = effectiveTarget(ind, targetMap.get(ind.id));
+      const t = resolveTarget(ind, targets as TargetRow[], period.year, period.month);
       const e = entryMap.get(ind.id);
       max += Number(ind.max_points);
       real += pointsFrom(ind, e?.realizado != null ? Number(e.realizado) : null, t);

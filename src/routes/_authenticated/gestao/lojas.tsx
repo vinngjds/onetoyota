@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Plus, UserPlus, X } from "lucide-react";
+import { Trash2, Plus, X, Pencil, Check } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/gestao/lojas")({
@@ -55,6 +55,15 @@ function GestaoLojas() {
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["gestao-stores"] }); qc.invalidateQueries({ queryKey: ["my-stores"] }); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const updateStore = useMutation({
+    mutationFn: async (p: { id: string; name: string; code: string | null }) => {
+      const { error } = await supabase.from("stores").update({ name: p.name, code: p.code }).eq("id", p.id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["gestao-stores"] }); qc.invalidateQueries({ queryKey: ["my-stores"] }); toast.success("Loja atualizada"); },
     onError: (e: any) => toast.error(e.message),
   });
 
@@ -123,15 +132,12 @@ function GestaoLojas() {
           const storeAssigns = assigns.filter((a) => a.store_id === s.id);
           return (
             <Card key={s.id} className="p-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="font-semibold">{s.name}</div>
-                  <div className="text-xs text-slate-500">{s.code || "sem código"}</div>
-                </div>
-                <Button variant="ghost" size="sm" onClick={() => confirm("Remover loja?") && delStore.mutate(s.id)}>
-                  <Trash2 className="w-4 h-4 text-red-500" />
-                </Button>
-              </div>
+              <StoreHeader
+                store={s}
+                onSave={(name, code) => updateStore.mutate({ id: s.id, name, code: code || null })}
+                onDelete={() => confirm("Remover loja?") && delStore.mutate(s.id)}
+              />
+
               <div className="mt-4">
                 <div className="text-xs uppercase text-slate-500 mb-2">LTs atribuídas</div>
                 <div className="flex flex-wrap gap-2">
@@ -195,6 +201,60 @@ function GestaoLojas() {
           </tbody>
         </table>
       </Card>
+    </div>
+  );
+}
+
+function StoreHeader({
+  store,
+  onSave,
+  onDelete,
+}: {
+  store: { id: string; name: string; code: string | null };
+  onSave: (name: string, code: string) => void;
+  onDelete: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState(store.name);
+  const [code, setCode] = useState(store.code ?? "");
+
+  if (editing) {
+    return (
+      <div className="flex items-start gap-2">
+        <div className="flex-1">
+          <Label className="text-xs">Nome</Label>
+          <Input className="h-8" value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+        <div className="w-40">
+          <Label className="text-xs">Código</Label>
+          <Input className="h-8" value={code} onChange={(e) => setCode(e.target.value)} />
+        </div>
+        <div className="flex items-end gap-1 pb-0.5">
+          <Button variant="ghost" size="sm" onClick={() => { onSave(name, code); setEditing(false); }}>
+            <Check className="w-4 h-4 text-green-600" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => { setName(store.name); setCode(store.code ?? ""); setEditing(false); }}>
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-start justify-between">
+      <div>
+        <div className="font-semibold">{store.name}</div>
+        <div className="text-xs text-slate-500">{store.code || "sem código"}</div>
+      </div>
+      <div className="flex gap-1">
+        <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
+          <Pencil className="w-4 h-4" />
+        </Button>
+        <Button variant="ghost" size="sm" onClick={onDelete}>
+          <Trash2 className="w-4 h-4 text-red-500" />
+        </Button>
+      </div>
     </div>
   );
 }
