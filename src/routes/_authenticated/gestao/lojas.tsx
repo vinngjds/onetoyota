@@ -132,15 +132,12 @@ function GestaoLojas() {
           const storeAssigns = assigns.filter((a) => a.store_id === s.id);
           return (
             <Card key={s.id} className="p-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="font-semibold">{s.name}</div>
-                  <div className="text-xs text-slate-500">{s.code || "sem código"}</div>
-                </div>
-                <Button variant="ghost" size="sm" onClick={() => confirm("Remover loja?") && delStore.mutate(s.id)}>
-                  <Trash2 className="w-4 h-4 text-red-500" />
-                </Button>
-              </div>
+              <StoreHeader
+                store={s}
+                onSave={(name, code) => updateStore.mutate({ id: s.id, name, code: code || null })}
+                onDelete={() => confirm("Remover loja?") && delStore.mutate(s.id)}
+              />
+
               <div className="mt-4">
                 <div className="text-xs uppercase text-slate-500 mb-2">LTs atribuídas</div>
                 <div className="flex flex-wrap gap-2">
