@@ -24,6 +24,7 @@ function LojaGestao() {
   const { storeId } = Route.useParams();
   const period = usePeriod();
   const [moduleFilter, setModuleFilter] = useState<string>("all");
+  const [status, setStatus] = useState<StatusFilterValue>("all");
 
   const q = useQuery({
     queryKey: ["gestao-loja", storeId, period.year, period.month],
