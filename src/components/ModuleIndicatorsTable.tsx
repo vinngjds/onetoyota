@@ -18,12 +18,14 @@ export function ModuleSection({
   year,
   month,
   compact = false,
+  statusFilter = "all",
 }: {
   storeId: string;
   moduleSlug: string;
   year: number;
   month: number;
   compact?: boolean;
+  statusFilter?: "all" | DeliveryStatus;
 }) {
   const userId = useCurrentUser();
   const qc = useQueryClient();
