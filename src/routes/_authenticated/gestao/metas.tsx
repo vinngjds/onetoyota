@@ -374,6 +374,24 @@ function MetaRow({
                       </div>
                     </Label>
                   </div>
+                  <div className="flex items-start gap-2">
+                    <RadioGroupItem id="scope-all-monthly" value="all_stores_monthly" className="mt-1" />
+                    <Label htmlFor="scope-all-monthly" className="font-normal cursor-pointer">
+                      Todas as lojas, somente {MONTHS[period.month - 1]}/{period.year}
+                      <div className="text-xs text-slate-500">
+                        Aplica esta meta em todas as lojas apenas neste mês.
+                      </div>
+                    </Label>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <RadioGroupItem id="scope-all-default" value="all_stores_default" className="mt-1" />
+                    <Label htmlFor="scope-all-default" className="font-normal cursor-pointer">
+                      Todas as lojas (meta padrão do indicador)
+                      <div className="text-xs text-slate-500">
+                        Atualiza a meta padrão do indicador e remove overrides existentes de todas as lojas.
+                      </div>
+                    </Label>
+                  </div>
                 </RadioGroup>
               </div>
             </div>
