@@ -111,14 +111,18 @@ function GestaoLojas() {
 
       <Card className="p-5">
         <div className="text-sm font-semibold mb-3">Nova loja</div>
-        <div className="flex gap-3">
-          <div className="flex-1">
+        <div className="flex gap-3 flex-wrap">
+          <div className="flex-1 min-w-[200px]">
             <Label>Nome</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Kuruma Vitória" />
           </div>
           <div className="w-40">
             <Label>Código</Label>
             <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="opcional" />
+          </div>
+          <div className="w-48">
+            <Label>Região</Label>
+            <Input value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Ex.: Sudeste" />
           </div>
           <div className="flex items-end">
             <Button onClick={() => addStore.mutate()} disabled={!name || addStore.isPending}>
