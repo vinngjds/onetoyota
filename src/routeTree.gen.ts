@@ -9,50 +9,230 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedHistoricoRouteImport } from './routes/_authenticated/historico'
+import { Route as AuthenticatedGestaoIndexRouteImport } from './routes/_authenticated/gestao/index'
+import { Route as AuthenticatedModuloSlugRouteImport } from './routes/_authenticated/modulo.$slug'
+import { Route as AuthenticatedGestaoMetasRouteImport } from './routes/_authenticated/gestao/metas'
+import { Route as AuthenticatedGestaoLojasRouteImport } from './routes/_authenticated/gestao/lojas'
+import { Route as AuthenticatedGestaoIndicadoresRouteImport } from './routes/_authenticated/gestao/indicadores'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedHistoricoRoute = AuthenticatedHistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedGestaoIndexRoute =
+  AuthenticatedGestaoIndexRouteImport.update({
+    id: '/gestao/',
+    path: '/gestao/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedModuloSlugRoute = AuthenticatedModuloSlugRouteImport.update({
+  id: '/modulo/$slug',
+  path: '/modulo/$slug',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedGestaoMetasRoute =
+  AuthenticatedGestaoMetasRouteImport.update({
+    id: '/gestao/metas',
+    path: '/gestao/metas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedGestaoLojasRoute =
+  AuthenticatedGestaoLojasRouteImport.update({
+    id: '/gestao/lojas',
+    path: '/gestao/lojas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedGestaoIndicadoresRoute =
+  AuthenticatedGestaoIndicadoresRouteImport.update({
+    id: '/gestao/indicadores',
+    path: '/gestao/indicadores',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/auth': typeof AuthRoute
+  '/historico': typeof AuthenticatedHistoricoRoute
+  '/gestao/indicadores': typeof AuthenticatedGestaoIndicadoresRoute
+  '/gestao/lojas': typeof AuthenticatedGestaoLojasRoute
+  '/gestao/metas': typeof AuthenticatedGestaoMetasRoute
+  '/modulo/$slug': typeof AuthenticatedModuloSlugRoute
+  '/gestao/': typeof AuthenticatedGestaoIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/historico': typeof AuthenticatedHistoricoRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/gestao/indicadores': typeof AuthenticatedGestaoIndicadoresRoute
+  '/gestao/lojas': typeof AuthenticatedGestaoLojasRoute
+  '/gestao/metas': typeof AuthenticatedGestaoMetasRoute
+  '/modulo/$slug': typeof AuthenticatedModuloSlugRoute
+  '/gestao': typeof AuthenticatedGestaoIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/historico': typeof AuthenticatedHistoricoRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/gestao/indicadores': typeof AuthenticatedGestaoIndicadoresRoute
+  '/_authenticated/gestao/lojas': typeof AuthenticatedGestaoLojasRoute
+  '/_authenticated/gestao/metas': typeof AuthenticatedGestaoMetasRoute
+  '/_authenticated/modulo/$slug': typeof AuthenticatedModuloSlugRoute
+  '/_authenticated/gestao/': typeof AuthenticatedGestaoIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/historico'
+    | '/gestao/indicadores'
+    | '/gestao/lojas'
+    | '/gestao/metas'
+    | '/modulo/$slug'
+    | '/gestao/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/auth'
+    | '/historico'
+    | '/'
+    | '/gestao/indicadores'
+    | '/gestao/lojas'
+    | '/gestao/metas'
+    | '/modulo/$slug'
+    | '/gestao'
+  id:
+    | '__root__'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/historico'
+    | '/_authenticated/'
+    | '/_authenticated/gestao/indicadores'
+    | '/_authenticated/gestao/lojas'
+    | '/_authenticated/gestao/metas'
+    | '/_authenticated/modulo/$slug'
+    | '/_authenticated/gestao/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/': {
+      id: '/_authenticated/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/historico': {
+      id: '/_authenticated/historico'
+      path: '/historico'
+      fullPath: '/historico'
+      preLoaderRoute: typeof AuthenticatedHistoricoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/gestao/': {
+      id: '/_authenticated/gestao/'
+      path: '/gestao'
+      fullPath: '/gestao/'
+      preLoaderRoute: typeof AuthenticatedGestaoIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/modulo/$slug': {
+      id: '/_authenticated/modulo/$slug'
+      path: '/modulo/$slug'
+      fullPath: '/modulo/$slug'
+      preLoaderRoute: typeof AuthenticatedModuloSlugRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/gestao/metas': {
+      id: '/_authenticated/gestao/metas'
+      path: '/gestao/metas'
+      fullPath: '/gestao/metas'
+      preLoaderRoute: typeof AuthenticatedGestaoMetasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/gestao/lojas': {
+      id: '/_authenticated/gestao/lojas'
+      path: '/gestao/lojas'
+      fullPath: '/gestao/lojas'
+      preLoaderRoute: typeof AuthenticatedGestaoLojasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/gestao/indicadores': {
+      id: '/_authenticated/gestao/indicadores'
+      path: '/gestao/indicadores'
+      fullPath: '/gestao/indicadores'
+      preLoaderRoute: typeof AuthenticatedGestaoIndicadoresRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedHistoricoRoute: typeof AuthenticatedHistoricoRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedGestaoIndicadoresRoute: typeof AuthenticatedGestaoIndicadoresRoute
+  AuthenticatedGestaoLojasRoute: typeof AuthenticatedGestaoLojasRoute
+  AuthenticatedGestaoMetasRoute: typeof AuthenticatedGestaoMetasRoute
+  AuthenticatedModuloSlugRoute: typeof AuthenticatedModuloSlugRoute
+  AuthenticatedGestaoIndexRoute: typeof AuthenticatedGestaoIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedHistoricoRoute: AuthenticatedHistoricoRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedGestaoIndicadoresRoute: AuthenticatedGestaoIndicadoresRoute,
+  AuthenticatedGestaoLojasRoute: AuthenticatedGestaoLojasRoute,
+  AuthenticatedGestaoMetasRoute: AuthenticatedGestaoMetasRoute,
+  AuthenticatedModuloSlugRoute: AuthenticatedModuloSlugRoute,
+  AuthenticatedGestaoIndexRoute: AuthenticatedGestaoIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
