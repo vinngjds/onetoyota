@@ -105,14 +105,24 @@ export function GestaoOverview() {
     });
   }, [q.data, period.year, period.month]);
 
+  const regions = useMemo(() => {
+    const set = new Set<string>();
+    rows.forEach((r) => {
+      const rg = (r.store as any).region;
+      if (rg) set.add(rg);
+    });
+    return Array.from(set).sort();
+  }, [rows]);
+
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
     let list = rows;
     if (term) list = list.filter((r) => r.store.name.toLowerCase().includes(term));
+    if (region !== "all") list = list.filter((r) => (r.store as any).region === region);
     if (sort === "name") list = [...list].sort((a, b) => a.store.name.localeCompare(b.store.name));
     else list = [...list].sort((a, b) => b.cls.pct - a.cls.pct);
     return list;
-  }, [rows, search, sort]);
+  }, [rows, search, region, sort]);
 
   if (q.isLoading) return <div className="text-slate-500">Carregando...</div>;
 
