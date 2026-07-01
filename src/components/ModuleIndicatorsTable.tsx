@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/lib/session";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { pctReal, pointsFrom, resolveTarget, type Indicator, type TargetRow } from "@/lib/scoring";
+import { pctReal, pointsFrom, resolveTarget, deliveryStatus, type Indicator, type TargetRow, type DeliveryStatus } from "@/lib/scoring";
 import { toast } from "sonner";
 
 function fmtPct(v: number | null | undefined) {
