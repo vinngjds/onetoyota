@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useSelectedStoreId } from "@/lib/session";
 import { Card } from "@/components/ui/card";
-import { classifyScore, effectiveTarget, pointsFrom, type Indicator } from "@/lib/scoring";
+import { classifyScore, resolveTarget, pointsFrom, type Indicator, type TargetRow } from "@/lib/scoring";
 
 export const Route = createFileRoute("/_authenticated/historico")({
   component: Historico,
