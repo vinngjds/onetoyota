@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePeriod, useSelectedStoreId } from "@/lib/session";
 import { Card } from "@/components/ui/card";
 import { Shield, TrendingUp, Users, Package, ArrowRight } from "lucide-react";
-import { pointsFrom, effectiveTarget, classifyScore, type Indicator } from "@/lib/scoring";
+import { pointsFrom, resolveTarget, classifyScore, type Indicator, type TargetRow } from "@/lib/scoring";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: Dashboard,
