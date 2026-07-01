@@ -254,12 +254,17 @@ function MetaRow({
   annual: TargetRow | null;
   monthly: TargetRow | null;
   period: { year: number; month: number };
-  onSave: (p: { target: number; period_year: number | null; period_month: number | null }) => void;
+  onSave: (p: {
+    target: number;
+    scope: "monthly" | "annual" | "all_stores_monthly" | "all_stores_default";
+  }) => void;
   onDelete: (id: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
-  const [scope, setScope] = useState<"annual" | "monthly">("monthly");
+  const [scope, setScope] = useState<
+    "monthly" | "annual" | "all_stores_monthly" | "all_stores_default"
+  >("monthly");
 
   const openDialog = () => {
     const current = monthly ?? annual;
@@ -273,11 +278,17 @@ function MetaRow({
       toast.error("Informe um valor");
       return;
     }
-    onSave({
-      target: Number(value),
-      period_year: scope === "monthly" ? period.year : null,
-      period_month: scope === "monthly" ? period.month : null,
-    });
+    if (
+      (scope === "all_stores_default" || scope === "all_stores_monthly") &&
+      !confirm(
+        scope === "all_stores_default"
+          ? "Isto atualiza a meta padrão do indicador para TODAS as lojas e remove overrides existentes. Continuar?"
+          : "Isto aplica a meta em TODAS as lojas apenas para este mês. Continuar?",
+      )
+    ) {
+      return;
+    }
+    onSave({ target: Number(value), scope });
     setOpen(false);
   };
 
