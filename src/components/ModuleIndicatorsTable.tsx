@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/lib/session";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { pctReal, pointsFrom, resolveTarget, type Indicator, type TargetRow } from "@/lib/scoring";
+import { pctReal, pointsFrom, resolveTarget, deliveryStatus, type Indicator, type TargetRow, type DeliveryStatus } from "@/lib/scoring";
 import { toast } from "sonner";
 
 function fmtPct(v: number | null | undefined) {
@@ -18,12 +18,14 @@ export function ModuleSection({
   year,
   month,
   compact = false,
+  statusFilter = "all",
 }: {
   storeId: string;
   moduleSlug: string;
   year: number;
   month: number;
   compact?: boolean;
+  statusFilter?: "all" | DeliveryStatus;
 }) {
   const userId = useCurrentUser();
   const qc = useQueryClient();
@@ -85,6 +87,12 @@ export function ModuleSection({
 
   const groups = new Map<string, Indicator[]>();
   indicators.forEach((ind) => {
+    if (statusFilter !== "all") {
+      const t = resolveTarget(ind, targets as TargetRow[], year, month);
+      const e = entryMap.get(ind.id);
+      const st = deliveryStatus(ind, e?.realizado != null ? Number(e.realizado) : null, t);
+      if (st !== statusFilter) return;
+    }
     const g = ind.subgroup ?? "Geral";
     if (!groups.has(g)) groups.set(g, []);
     groups.get(g)!.push(ind);
@@ -104,6 +112,8 @@ export function ModuleSection({
       t,
     );
   });
+
+  if (statusFilter !== "all" && groups.size === 0) return null;
 
   return (
     <section className="space-y-4">
@@ -197,6 +207,13 @@ function IndicatorRow({
   const realNum = realStr === "" ? null : Number(realStr);
   const p = pctReal(indicator, realNum, target);
   const pts = pointsFrom(indicator, realNum, target);
+  const status = deliveryStatus(indicator, realNum, target);
+  const rowBg =
+    status === "entregue"
+      ? "bg-green-500/10"
+      : status === "parcial"
+        ? "bg-yellow-400/10"
+        : "bg-red-500/10";
 
   const unitSuffix =
     indicator.unit === "percent"
@@ -208,7 +225,8 @@ function IndicatorRow({
           : "";
 
   return (
-    <tr className="border-b last:border-b-0 hover:bg-slate-50/50">
+    <tr className={`border-b last:border-b-0 ${rowBg} hover:brightness-95 transition`}>
+
       <td className="px-5 py-2 font-medium">{indicator.name}</td>
       <td className="px-3 py-2 text-right">{Number(indicator.max_points).toFixed(2)}</td>
       <td className="px-3 py-2 text-right text-slate-600">

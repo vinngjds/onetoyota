@@ -66,15 +66,61 @@ function GestaoMetas() {
     mutationFn: async (p: {
       indicator_id: string;
       target: number;
-      period_year: number | null;
-      period_month: number | null;
+      scope: "monthly" | "annual" | "all_stores_monthly" | "all_stores_default";
     }) => {
-      // Manual upsert (unique index uses COALESCE, so onConflict isn't declared)
+      if (p.scope === "all_stores_default") {
+        // Meta padrão global do indicador + remove overrides em todas as lojas
+        const { error: e1 } = await supabase
+          .from("indicators")
+          .update({ default_target: p.target } as any)
+          .eq("id", p.indicator_id);
+        if (e1) throw e1;
+        const { error: e2 } = await supabase
+          .from("store_indicator_targets")
+          .delete()
+          .eq("indicator_id", p.indicator_id);
+        if (e2) throw e2;
+        return;
+      }
+      if (p.scope === "all_stores_monthly") {
+        // Upsert por loja no mês selecionado
+        const stores = storesQ.data ?? [];
+        for (const s of stores) {
+          const { data: existing } = await supabase
+            .from("store_indicator_targets")
+            .select("id")
+            .eq("store_id", s.id)
+            .eq("indicator_id", p.indicator_id)
+            .eq("period_year", period.year)
+            .eq("period_month", period.month)
+            .maybeSingle();
+          if (existing) {
+            const { error } = await supabase
+              .from("store_indicator_targets")
+              .update({ target: p.target } as any)
+              .eq("id", existing.id);
+            if (error) throw error;
+          } else {
+            const { error } = await supabase.from("store_indicator_targets").insert({
+              store_id: s.id,
+              indicator_id: p.indicator_id,
+              target: p.target,
+              period_year: period.year,
+              period_month: period.month,
+            } as any);
+            if (error) throw error;
+          }
+        }
+        return;
+      }
+      // Escopos por loja atual
+      const period_year = p.scope === "monthly" ? period.year : null;
+      const period_month = p.scope === "monthly" ? period.month : null;
       const existing = (q.data?.targets ?? []).find(
         (t) =>
           t.indicator_id === p.indicator_id &&
-          t.period_year === p.period_year &&
-          t.period_month === p.period_month,
+          t.period_year === period_year &&
+          t.period_month === period_month,
       );
       if (existing) {
         const { error } = await supabase
@@ -87,13 +133,17 @@ function GestaoMetas() {
           store_id: storeId,
           indicator_id: p.indicator_id,
           target: p.target,
-          period_year: p.period_year,
-          period_month: p.period_month,
+          period_year,
+          period_month,
         } as any);
         if (error) throw error;
       }
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["gestao-metas", storeId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["gestao-metas", storeId] });
+      qc.invalidateQueries({ queryKey: ["gestao-overview"] });
+      toast.success("Meta atualizada");
+    },
     onError: (e: any) => toast.error(e.message),
   });
 
@@ -204,12 +254,17 @@ function MetaRow({
   annual: TargetRow | null;
   monthly: TargetRow | null;
   period: { year: number; month: number };
-  onSave: (p: { target: number; period_year: number | null; period_month: number | null }) => void;
+  onSave: (p: {
+    target: number;
+    scope: "monthly" | "annual" | "all_stores_monthly" | "all_stores_default";
+  }) => void;
   onDelete: (id: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
-  const [scope, setScope] = useState<"annual" | "monthly">("monthly");
+  const [scope, setScope] = useState<
+    "monthly" | "annual" | "all_stores_monthly" | "all_stores_default"
+  >("monthly");
 
   const openDialog = () => {
     const current = monthly ?? annual;
@@ -223,11 +278,17 @@ function MetaRow({
       toast.error("Informe um valor");
       return;
     }
-    onSave({
-      target: Number(value),
-      period_year: scope === "monthly" ? period.year : null,
-      period_month: scope === "monthly" ? period.month : null,
-    });
+    if (
+      (scope === "all_stores_default" || scope === "all_stores_monthly") &&
+      !confirm(
+        scope === "all_stores_default"
+          ? "Isto atualiza a meta padrão do indicador para TODAS as lojas e remove overrides existentes. Continuar?"
+          : "Isto aplica a meta em TODAS as lojas apenas para este mês. Continuar?",
+      )
+    ) {
+      return;
+    }
+    onSave({ target: Number(value), scope });
     setOpen(false);
   };
 
@@ -310,6 +371,24 @@ function MetaRow({
                       Todos os meses (meta anual da loja)
                       <div className="text-xs text-slate-500">
                         Sobrepõe a meta padrão em todos os meses sem meta específica.
+                      </div>
+                    </Label>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <RadioGroupItem id="scope-all-monthly" value="all_stores_monthly" className="mt-1" />
+                    <Label htmlFor="scope-all-monthly" className="font-normal cursor-pointer">
+                      Todas as lojas, somente {MONTHS[period.month - 1]}/{period.year}
+                      <div className="text-xs text-slate-500">
+                        Aplica esta meta em todas as lojas apenas neste mês.
+                      </div>
+                    </Label>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <RadioGroupItem id="scope-all-default" value="all_stores_default" className="mt-1" />
+                    <Label htmlFor="scope-all-default" className="font-normal cursor-pointer">
+                      Todas as lojas (meta padrão do indicador)
+                      <div className="text-xs text-slate-500">
+                        Atualiza a meta padrão do indicador e remove overrides existentes de todas as lojas.
                       </div>
                     </Label>
                   </div>

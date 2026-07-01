@@ -18,6 +18,7 @@ function GestaoLojas() {
   const qc = useQueryClient();
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
+  const [region, setRegion] = useState("");
 
   const storesQ = useQuery({
     queryKey: ["gestao-stores"],
@@ -42,10 +43,10 @@ function GestaoLojas() {
 
   const addStore = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("stores").insert({ name, code: code || null });
+      const { error } = await supabase.from("stores").insert({ name, code: code || null, region: region || null } as any);
       if (error) throw error;
     },
-    onSuccess: () => { setName(""); setCode(""); qc.invalidateQueries({ queryKey: ["gestao-stores"] }); qc.invalidateQueries({ queryKey: ["my-stores"] }); toast.success("Loja criada"); },
+    onSuccess: () => { setName(""); setCode(""); setRegion(""); qc.invalidateQueries({ queryKey: ["gestao-stores"] }); qc.invalidateQueries({ queryKey: ["my-stores"] }); toast.success("Loja criada"); },
     onError: (e: any) => toast.error(e.message),
   });
 
@@ -59,8 +60,8 @@ function GestaoLojas() {
   });
 
   const updateStore = useMutation({
-    mutationFn: async (p: { id: string; name: string; code: string | null }) => {
-      const { error } = await supabase.from("stores").update({ name: p.name, code: p.code }).eq("id", p.id);
+    mutationFn: async (p: { id: string; name: string; code: string | null; region: string | null }) => {
+      const { error } = await supabase.from("stores").update({ name: p.name, code: p.code, region: p.region } as any).eq("id", p.id);
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["gestao-stores"] }); qc.invalidateQueries({ queryKey: ["my-stores"] }); toast.success("Loja atualizada"); },
@@ -110,14 +111,18 @@ function GestaoLojas() {
 
       <Card className="p-5">
         <div className="text-sm font-semibold mb-3">Nova loja</div>
-        <div className="flex gap-3">
-          <div className="flex-1">
+        <div className="flex gap-3 flex-wrap">
+          <div className="flex-1 min-w-[200px]">
             <Label>Nome</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Kuruma Vitória" />
           </div>
           <div className="w-40">
             <Label>Código</Label>
             <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="opcional" />
+          </div>
+          <div className="w-48">
+            <Label>Região</Label>
+            <Input value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Ex.: Sudeste" />
           </div>
           <div className="flex items-end">
             <Button onClick={() => addStore.mutate()} disabled={!name || addStore.isPending}>
@@ -134,7 +139,7 @@ function GestaoLojas() {
             <Card key={s.id} className="p-5">
               <StoreHeader
                 store={s}
-                onSave={(name, code) => updateStore.mutate({ id: s.id, name, code: code || null })}
+                onSave={(name, code, region) => updateStore.mutate({ id: s.id, name, code: code || null, region: region || null })}
                 onDelete={() => confirm("Remover loja?") && delStore.mutate(s.id)}
               />
 
@@ -210,30 +215,35 @@ function StoreHeader({
   onSave,
   onDelete,
 }: {
-  store: { id: string; name: string; code: string | null };
-  onSave: (name: string, code: string) => void;
+  store: { id: string; name: string; code: string | null; region?: string | null };
+  onSave: (name: string, code: string, region: string) => void;
   onDelete: () => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(store.name);
   const [code, setCode] = useState(store.code ?? "");
+  const [region, setRegion] = useState((store as any).region ?? "");
 
   if (editing) {
     return (
-      <div className="flex items-start gap-2">
-        <div className="flex-1">
+      <div className="flex items-start gap-2 flex-wrap">
+        <div className="flex-1 min-w-[180px]">
           <Label className="text-xs">Nome</Label>
           <Input className="h-8" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
-        <div className="w-40">
+        <div className="w-32">
           <Label className="text-xs">Código</Label>
           <Input className="h-8" value={code} onChange={(e) => setCode(e.target.value)} />
         </div>
+        <div className="w-40">
+          <Label className="text-xs">Região</Label>
+          <Input className="h-8" value={region} onChange={(e) => setRegion(e.target.value)} />
+        </div>
         <div className="flex items-end gap-1 pb-0.5">
-          <Button variant="ghost" size="sm" onClick={() => { onSave(name, code); setEditing(false); }}>
+          <Button variant="ghost" size="sm" onClick={() => { onSave(name, code, region); setEditing(false); }}>
             <Check className="w-4 h-4 text-green-600" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => { setName(store.name); setCode(store.code ?? ""); setEditing(false); }}>
+          <Button variant="ghost" size="sm" onClick={() => { setName(store.name); setCode(store.code ?? ""); setRegion((store as any).region ?? ""); setEditing(false); }}>
             <X className="w-4 h-4" />
           </Button>
         </div>
@@ -245,7 +255,10 @@ function StoreHeader({
     <div className="flex items-start justify-between">
       <div>
         <div className="font-semibold">{store.name}</div>
-        <div className="text-xs text-slate-500">{store.code || "sem código"}</div>
+        <div className="text-xs text-slate-500">
+          {store.code || "sem código"}
+          {(store as any).region ? ` · ${(store as any).region}` : ""}
+        </div>
       </div>
       <div className="flex gap-1">
         <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>

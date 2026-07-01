@@ -25,7 +25,8 @@ const ICONS: Record<string, any> = {
 export function GestaoOverview() {
   const period = usePeriod();
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<"name" | "pct">("name");
+  const [region, setRegion] = useState<string>("all");
+  const [sort, setSort] = useState<"name" | "pct">("pct");
 
   const q = useQuery({
     queryKey: ["gestao-overview", period.year, period.month],
@@ -104,14 +105,24 @@ export function GestaoOverview() {
     });
   }, [q.data, period.year, period.month]);
 
+  const regions = useMemo(() => {
+    const set = new Set<string>();
+    rows.forEach((r) => {
+      const rg = (r.store as any).region;
+      if (rg) set.add(rg);
+    });
+    return Array.from(set).sort();
+  }, [rows]);
+
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
     let list = rows;
     if (term) list = list.filter((r) => r.store.name.toLowerCase().includes(term));
+    if (region !== "all") list = list.filter((r) => (r.store as any).region === region);
     if (sort === "name") list = [...list].sort((a, b) => a.store.name.localeCompare(b.store.name));
     else list = [...list].sort((a, b) => b.cls.pct - a.cls.pct);
     return list;
-  }, [rows, search, sort]);
+  }, [rows, search, region, sort]);
 
   if (q.isLoading) return <div className="text-slate-500">Carregando...</div>;
 
@@ -134,13 +145,26 @@ export function GestaoOverview() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
+          <Select value={region} onValueChange={setRegion}>
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder="Região" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as regiões</SelectItem>
+              {regions.map((r) => (
+                <SelectItem key={r} value={r}>
+                  {r}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Select value={sort} onValueChange={(v) => setSort(v as any)}>
             <SelectTrigger className="w-44">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="name">Ordenar por nome</SelectItem>
               <SelectItem value="pct">Ordenar por atingimento</SelectItem>
+              <SelectItem value="name">Ordenar por nome</SelectItem>
             </SelectContent>
           </Select>
         </div>

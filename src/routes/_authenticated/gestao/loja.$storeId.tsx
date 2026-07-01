@@ -14,6 +14,7 @@ import {
   type TargetRow,
 } from "@/lib/scoring";
 import { ModuleSection } from "@/components/ModuleIndicatorsTable";
+import { StatusFilter, type StatusFilterValue } from "@/components/StatusFilter";
 
 export const Route = createFileRoute("/_authenticated/gestao/loja/$storeId")({
   component: LojaGestao,
@@ -23,6 +24,7 @@ function LojaGestao() {
   const { storeId } = Route.useParams();
   const period = usePeriod();
   const [moduleFilter, setModuleFilter] = useState<string>("all");
+  const [status, setStatus] = useState<StatusFilterValue>("all");
 
   const q = useQuery({
     queryKey: ["gestao-loja", storeId, period.year, period.month],
@@ -99,7 +101,8 @@ function LojaGestao() {
             {lts.length ? `LT: ${lts.join(", ")}` : "Sem LT atribuída"}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <StatusFilter value={status} onChange={setStatus} />
           <Select value={moduleFilter} onValueChange={setModuleFilter}>
             <SelectTrigger className="w-64">
               <SelectValue />
@@ -153,6 +156,7 @@ function LojaGestao() {
             year={period.year}
             month={period.month}
             compact
+            statusFilter={status}
           />
         ))}
       </div>
