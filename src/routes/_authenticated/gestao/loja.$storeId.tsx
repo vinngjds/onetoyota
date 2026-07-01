@@ -14,6 +14,7 @@ import {
   type TargetRow,
 } from "@/lib/scoring";
 import { ModuleSection } from "@/components/ModuleIndicatorsTable";
+import { StatusFilter, type StatusFilterValue } from "@/components/StatusFilter";
 
 export const Route = createFileRoute("/_authenticated/gestao/loja/$storeId")({
   component: LojaGestao,
