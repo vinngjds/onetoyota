@@ -19,6 +19,28 @@ export function effectiveTarget(ind: Indicator, override?: number | null) {
   return override ?? ind.default_target ?? 0;
 }
 
+export type TargetRow = {
+  indicator_id: string;
+  target: number | string;
+  period_year: number | null;
+  period_month: number | null;
+};
+
+/** Resolve meta com prioridade: mês específico → padrão anual da loja → default do indicador. */
+export function resolveTarget(
+  ind: Indicator,
+  targets: TargetRow[],
+  year: number,
+  month: number,
+): number {
+  const list = targets.filter((t) => t.indicator_id === ind.id);
+  const monthly = list.find((t) => t.period_year === year && t.period_month === month);
+  if (monthly) return Number(monthly.target);
+  const annual = list.find((t) => t.period_year == null && t.period_month == null);
+  if (annual) return Number(annual.target);
+  return ind.default_target ?? 0;
+}
+
 // % Real = realizado / objetivo (para boolean: 1 = 100%)
 export function pctReal(ind: Indicator, realizado: number | null, target: number) {
   if (realizado == null) return null;
