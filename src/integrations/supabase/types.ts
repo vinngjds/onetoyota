@@ -14,16 +14,286 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      classification_bands: {
+        Row: {
+          color: string
+          id: string
+          letter: string
+          min_score: number
+        }
+        Insert: {
+          color?: string
+          id?: string
+          letter: string
+          min_score: number
+        }
+        Update: {
+          color?: string
+          id?: string
+          letter?: string
+          min_score?: number
+        }
+        Relationships: []
+      }
+      indicator_entries: {
+        Row: {
+          id: string
+          indicator_id: string
+          period_month: number
+          period_year: number
+          projecao: number | null
+          realizado: number | null
+          store_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          indicator_id: string
+          period_month: number
+          period_year: number
+          projecao?: number | null
+          realizado?: number | null
+          store_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          indicator_id?: string
+          period_month?: number
+          period_year?: number
+          projecao?: number | null
+          realizado?: number | null
+          store_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicator_entries_indicator_id_fkey"
+            columns: ["indicator_id"]
+            isOneToOne: false
+            referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicator_entries_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      indicators: {
+        Row: {
+          created_at: string
+          default_target: number | null
+          id: string
+          max_points: number
+          module_id: string
+          name: string
+          sort_order: number
+          subgroup: string | null
+          unit: string
+        }
+        Insert: {
+          created_at?: string
+          default_target?: number | null
+          id?: string
+          max_points?: number
+          module_id: string
+          name: string
+          sort_order?: number
+          subgroup?: string | null
+          unit?: string
+        }
+        Update: {
+          created_at?: string
+          default_target?: number | null
+          id?: string
+          max_points?: number
+          module_id?: string
+          name?: string
+          sort_order?: number
+          subgroup?: string | null
+          unit?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicators_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modules: {
+        Row: {
+          color: string
+          id: string
+          name: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          color?: string
+          id?: string
+          name: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          color?: string
+          id?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string
+          id: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      store_assignments: {
+        Row: {
+          created_at: string
+          id: string
+          store_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          store_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          store_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_assignments_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_indicator_targets: {
+        Row: {
+          id: string
+          indicator_id: string
+          store_id: string
+          target: number
+        }
+        Insert: {
+          id?: string
+          indicator_id: string
+          store_id: string
+          target: number
+        }
+        Update: {
+          id?: string
+          indicator_id?: string
+          store_id?: string
+          target?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_indicator_targets_indicator_id_fkey"
+            columns: ["indicator_id"]
+            isOneToOne: false
+            referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_indicator_targets_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stores: {
+        Row: {
+          code: string | null
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          code?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "lt" | "gestao"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +420,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["lt", "gestao"],
+    },
   },
 } as const
