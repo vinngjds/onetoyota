@@ -207,6 +207,13 @@ function IndicatorRow({
   const realNum = realStr === "" ? null : Number(realStr);
   const p = pctReal(indicator, realNum, target);
   const pts = pointsFrom(indicator, realNum, target);
+  const status = deliveryStatus(indicator, realNum, target);
+  const rowBg =
+    status === "entregue"
+      ? "bg-green-500/10"
+      : status === "parcial"
+        ? "bg-yellow-400/10"
+        : "bg-red-500/10";
 
   const unitSuffix =
     indicator.unit === "percent"
@@ -218,7 +225,8 @@ function IndicatorRow({
           : "";
 
   return (
-    <tr className="border-b last:border-b-0 hover:bg-slate-50/50">
+    <tr className={`border-b last:border-b-0 ${rowBg} hover:brightness-95 transition`}>
+
       <td className="px-5 py-2 font-medium">{indicator.name}</td>
       <td className="px-3 py-2 text-right">{Number(indicator.max_points).toFixed(2)}</td>
       <td className="px-3 py-2 text-right text-slate-600">
