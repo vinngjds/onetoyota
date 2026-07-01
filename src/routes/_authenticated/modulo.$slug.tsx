@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePeriod, useSelectedStoreId, useCurrentUser } from "@/lib/session";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+
 import { ArrowLeft } from "lucide-react";
 import { pctReal, pointsFrom, resolveTarget, type Indicator, type TargetRow } from "@/lib/scoring";
 import { toast } from "sonner";
