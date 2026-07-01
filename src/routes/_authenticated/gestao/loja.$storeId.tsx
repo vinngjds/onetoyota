@@ -101,7 +101,8 @@ function LojaGestao() {
             {lts.length ? `LT: ${lts.join(", ")}` : "Sem LT atribuída"}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <StatusFilter value={status} onChange={setStatus} />
           <Select value={moduleFilter} onValueChange={setModuleFilter}>
             <SelectTrigger className="w-64">
               <SelectValue />
