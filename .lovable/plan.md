@@ -1,58 +1,39 @@
+## Escopo
 
-# Plano — App de Indicadores Kuruma
+1. **Dashboard = visão da LT** (mantido como está). Uma visão de Gestão será criada em outro turno.
+2. **Sidebar da LT**: remover os 4 links de módulos. Manter apenas **Dashboard** e **Histórico**. Cards do Dashboard continuam clicáveis e abrem `/modulo/$slug`.
+3. **Sidebar da Gestão**: mantém Consolidado, Lojas & LTs, Indicadores, Metas.
+4. **Cadastro das 21 lojas** (sem código, sem LT): Vila Velha, Pampulha, Contagem, G. Valadares, Manhuaçu, Ipatinga, Juiz de Fora, Vitória, Linhares, Carandaí, Serra, Muriaé, Sete Lagoas, GAB, Uberlândia JP, Colatina, SIA, Cachoeiro, Uberaba, Patos, Épia, Taguatinga, Uberlândia JN.
+5. **Cadastro dos indicadores** por módulo (pontuação / meta padrão / subgrupo). Unidades: `percent` (%), `currency` (R$), `number`, `boolean` (SIM/NÃO).
 
-## Visão geral
-Aplicação web para substituir a planilha de acompanhamento de indicadores por loja. Dois perfis de acesso (Líder de Transformação e Gestão Administrativa), com preenchimento recorrente durante o mês e consolidação automática de pontuação.
+### Segurança, Qualidade e ESG (12 pts)
+- **NPS de Vendas**: Média Móvel (2 / 96%), Média Trimestral (1 / 96%)
+- **NPS de Serviços**: Média Móvel (2 / 92%), Média Trimestral (1 / 92%)
+- **FIR**: Média Móvel (1 / 93%), Média Trimestral (0,5 / 93%)
+- **FIR de Reparo**: Média Móvel (1 / 90%), Média Trimestral (0,5 / 90%)
+- **ESG Programs** (boolean): 100% KPI's Ambientais (0,20), 100% DERAP (0,20), ISO 14001 (0,50), Relatório Sustentabilidade (0,10)
+- **Trilha de Vendas Online**: Trilha Consultor de Vendas VN (0,10 / 80%), Trilha Consultor de Vendas VD (0,03 / 80%), Trilha Entregador Técnico (0,03 / 2), Trilha Vendas EAD (0,10 / 100%)
+- **Trilha de Vendas Presencial**: Consultor de Vendas VN (0,12 / 2), Avaliador de Usados (0,12 / 1), Novos Produtos e Processos 2026 (0,10 / 100%)
+- **Trilha de Pós-Vendas Online**: Trilha Representante CR (0,10 / 1), Trilha de Serviços EAD (0,10 / 100%)
+- **Trilha de Pós-Vendas Presencial**: Consultor de Serviços (0,20 / 60%), Representante CR (0,10 / 1), Novos Produtos e Processos 2026 (0,10 / 100%)
+- **Team GP Online**: G4 (0,04 / 80%), G3 (0,04 / 60%), G2 (EL+MO+CH) (0,04 / 40%), G1 (MS+ESP) (0,04 / 2), Trilha Pré-LQS (0,04 / 2), Trilha LQS (0,04 / 1)
+- **Team GP Presencial**: G4 (0,10 / 80%), G3 (0,10 / 2), G2 (EL) (0,10 / 1), G2 (EL+MO+CH) (0,10 / 1), G1 (MS+ESP) (0,10 / 1), LQS (0,06 / 1)
 
-## Perfis e permissões
-- **Gestão Administrativa**: cria lojas, cria/edita indicadores (catálogo global), define metas padrão, ajusta metas por loja (exceções), atribui LTs às lojas, vê todas as lojas e dashboards consolidados.
-- **Líder de Transformação (LT)**: acessa apenas as lojas atribuídas, preenche o valor Realizado de cada indicador e o valor de Projeção (manual).
-- Cálculo automático de: % Real, Real (pontuação atingida) e Classificação final (A/B/C…).
+### Vendas (23 pts)
+- **Vendas Varejo**: Yaris Cross (0), Corolla SD (3/6), Corolla Cross (3/17), Hilux (5/14), SW4 (1/9), RAV4 (1/9)
+- **Vendas Diretas**: Faturamento Hilux (4/14), Faturamento Hiace Commuter (2/2), Cancelamento Hilux (1/2,80)
+- **Collaboration** (sem subgrupo): (1/30,06)
+- **Ciclo Toyota**: Penetração (1/8,25), Renovação (1/4%)
 
-## Estrutura de dados (Lovable Cloud)
-- `stores` — lojas
-- `profiles` — dados do usuário (nome)
-- `user_roles` — papel (`lt` | `gestao`) em tabela separada, com função `has_role` (segurança)
-- `store_assignments` — LT ↔ loja (many-to-many, atribuído pela Gestão)
-- `modules` — 4 módulos fixos: Segurança/Qualidade/ESG, Vendas, Retenção, Value Chain
-- `indicators` — catálogo (nome, módulo, subgrupo, pontuação máxima, tipo: %, número, moeda, SIM/NÃO)
-- `store_indicator_targets` — meta (objetivo) por loja/indicador (override da meta global do indicador)
-- `indicator_entries` — lançamentos recorrentes: loja, indicador, período (mês/ano), realizado, projeção, timestamp, autor
-- `classification_bands` — faixas de pontuação → letra (A/B/C)
+### Retenção (30 pts)
+Retenção Total (11/100%), CPUS CSR+CSP (4/1503), TKT Médio CSR+CSP (2/R$1.200), BPUS (4/114), Retenção Funilaria CFS (3/37,97%), TKT Médio Funilaria (2/R$14.000), Toyota 10 (3/272), Agendamento Ativo CRM (1/20%).
 
-Todas as tabelas com RLS: LT só vê/edita dados das lojas atribuídas; Gestão vê tudo.
-
-## Telas
-1. **/auth** — Login e cadastro (e-mail/senha + Google). Design inspirado no mockup enviado (tons de azul, formas orgânicas, cartão branco arredondado).
-2. **/ (dashboard LT)** — Seletor de loja (se tiver mais de uma) + 4 cards macro (Segurança/Qualidade/ESG, Vendas, Retenção, Value Chain) mostrando pontuação Realizado vs Objetivo e Classificação atual/projetada.
-3. **/modulo/:slug** — Tabela do módulo com todas as micro-tarefas: colunas Pontuação, Objetivo, Realizado, % Real, Real, Projeção. Inputs inline para Realizado e Projeção; demais colunas calculadas.
-4. **/historico** — Consulta de meses anteriores da loja.
-5. **/gestao** (só Gestão) — Lista de todas as lojas com pontuação consolidada, filtros por mês, drill-down por loja.
-6. **/gestao/lojas** — CRUD de lojas, atribuição de LTs.
-7. **/gestao/indicadores** — CRUD do catálogo de indicadores + metas globais.
-8. **/gestao/metas/:storeId** — Ajuste de metas específicas da loja (override).
-
-## Regras de cálculo
-- `% Real = Realizado / Objetivo` (respeitando tipo do indicador; SIM/NÃO = 100% ou 0%).
-- `Real (pontuação) = min(% Real, 100%) × Pontuação` (regra padrão; ajustável se a Gestão pedir outra).
-- `Projeção (pontuação)` a partir do valor projetado digitado pela LT, mesma fórmula.
-- `Classificação` = faixa da soma das pontuações do mês (ex.: ≥90 = A, ≥80 = B…).
-- Totais por módulo e total geral atualizados em tempo real.
-
-## Design
-Paleta azul do mockup (#4C6EF5 primário, tons claros de fundo), cartões brancos arredondados, tipografia sans-serif moderna (Figtree/Inter). Layout responsivo com sidebar colapsável para navegação entre módulos e áreas de gestão.
-
-## Fora do escopo desta primeira entrega
-- Importação da planilha atual (podemos adicionar depois).
-- Exportação para Excel/PDF.
-- Notificações por e-mail.
-- App mobile nativo (será web responsivo).
+### Value Chain (35 pts)
+Seminovo Certificado TCUV (4/12), Seminovo Certificado Simplificada (1/0), Ciclo Toyota Usados (1/9%), Venda Usados Toyota (2/35%), Trade-in (2/22), Acessórios PNV (3/R$228.900), Acessórios % Genuínos (1/90%), **Revisão na Medida**: 03 ou mais revisões (2/10,05) + a partir da 4ª (2/4,02), Times Sales (2/75%), Consórcio Toyota (2/9), Seguro Toyota Novos (2/9,35), Seguro Toyota Renovação (1/75%), KINTO One Fleet Net Bookings (2/100%), KINTO One Fleet Gross Bookings (1/100%), KINTO One Personal (2/2), KINTO Share Bookings (1/20), KINTO Share Tx Ocupação (1/50%), NPS KINTO (1/93%), Onboarding Connected e Renovação (2/90%).
 
 ## Detalhes técnicos
-- TanStack Start + Lovable Cloud (Supabase gerenciado).
-- Autenticação: e-mail/senha + Google (via broker Lovable).
-- Papéis em `user_roles` + `has_role()` SECURITY DEFINER, RLS em todas as tabelas.
-- Server functions (`createServerFn`) com `requireSupabaseAuth` para leituras/escritas autenticadas.
-- Cálculos derivados feitos no cliente a partir dos dados brutos (Realizado, Projeção, Objetivo, Pontuação), evitando duplicar estado no banco.
 
-Confirma que posso seguir com essa estrutura? Se sim, começo pelo login, cadastro de lojas/indicadores e o fluxo da LT.
+- **AppShell** (`src/components/AppShell.tsx`): remover o array `MODULE_LINKS` do render para LT; manter Dashboard e Histórico. Bloco `if (isGestao)` intacto. Rota `/modulo/$slug` permanece (acessada via cards do Dashboard).
+- **Migração 1 – lojas**: INSERT em `stores(name)` para as 21 lojas.
+- **Migração 2 – indicadores**: INSERT em `indicators(module_id, name, subgroup, max_points, default_target, unit, sort_order)` resolvendo `module_id` via `(SELECT id FROM modules WHERE slug = ...)`.
+- Nada muda em RLS, Histórico, tela de módulo ou lógica de scoring.

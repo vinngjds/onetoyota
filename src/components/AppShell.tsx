@@ -82,10 +82,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           <NavItem to="/" icon={LayoutDashboard} label="Dashboard" />
-          {MODULE_LINKS.map((m) => (
-            <NavItem key={m.slug} to={`/modulo/${m.slug}`} icon={m.icon} label={m.label} />
-          ))}
           <NavItem to="/historico" icon={History} label="Histórico" />
+
           {isGestao && (
             <>
               <div className="mt-4 mb-1 px-4 text-xs uppercase tracking-wide text-slate-400 font-semibold">
