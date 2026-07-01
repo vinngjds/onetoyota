@@ -156,6 +156,7 @@ function LojaGestao() {
             year={period.year}
             month={period.month}
             compact
+            statusFilter={status}
           />
         ))}
       </div>
