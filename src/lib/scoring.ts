@@ -56,6 +56,21 @@ export function pointsFrom(ind: Indicator, value: number | null, target: number)
   return Math.min(Math.max(p, 0), 1) * Number(ind.max_points);
 }
 
+export type DeliveryStatus = "entregue" | "parcial" | "nao-entregue";
+
+/** Null realizado é tratado como Não Entregue. */
+export function deliveryStatus(
+  ind: Indicator,
+  realizado: number | null,
+  target: number,
+): DeliveryStatus {
+  if (realizado == null || realizado === 0) return "nao-entregue";
+  if (ind.unit === "boolean") return realizado >= 1 ? "entregue" : "nao-entregue";
+  if (!target) return realizado > 0 ? "entregue" : "nao-entregue";
+  if (realizado >= target) return "entregue";
+  return "parcial";
+}
+
 export function classifyScore(
   totalScore: number,
   totalPossible: number,
