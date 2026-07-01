@@ -31,7 +31,6 @@ function Historico() {
   if (q.isLoading || !q.data) return <div className="text-slate-500">Carregando...</div>;
   const { indicators, targets, entries, bands } = q.data;
   const maxTotal = indicators.reduce((s, i) => s + Number(i.max_points), 0);
-  const targetMap = new Map(targets.map((t) => [t.indicator_id, Number(t.target)]));
 
   const periods = new Map<string, { year: number; month: number; entries: any[] }>();
   entries.forEach((e) => {
@@ -44,7 +43,7 @@ function Historico() {
     const eMap = new Map(p.entries.map((e) => [e.indicator_id, e]));
     let real = 0, proj = 0;
     indicators.forEach((ind) => {
-      const t = effectiveTarget(ind, targetMap.get(ind.id));
+      const t = resolveTarget(ind, targets as TargetRow[], p.year, p.month);
       const e: any = eMap.get(ind.id);
       real += pointsFrom(ind, e?.realizado != null ? Number(e.realizado) : null, t);
       proj += pointsFrom(ind, e?.projecao != null ? Number(e.projecao) : (e?.realizado != null ? Number(e.realizado) : null), t);
