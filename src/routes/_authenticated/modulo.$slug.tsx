@@ -73,7 +73,6 @@ function ModulePage() {
   if (q.isLoading || !q.data) return <div className="text-slate-500">Carregando...</div>;
 
   const { module: mod, indicators, targets, entries } = q.data;
-  const targetMap = new Map(targets.map((t) => [t.indicator_id, Number(t.target)]));
   const entryMap = new Map(entries.map((e) => [e.indicator_id, e]));
 
   // group by subgroup
@@ -86,7 +85,7 @@ function ModulePage() {
 
   let totalReal = 0, totalProj = 0, totalMax = 0;
   indicators.forEach((ind) => {
-    const t = effectiveTarget(ind, targetMap.get(ind.id));
+    const t = resolveTarget(ind, targets as TargetRow[], period.year, period.month);
     const e = entryMap.get(ind.id);
     totalMax += Number(ind.max_points);
     totalReal += pointsFrom(ind, e?.realizado != null ? Number(e.realizado) : null, t);
@@ -95,6 +94,9 @@ function ModulePage() {
 
   return (
     <div className="space-y-6">
+      <Link to="/" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900 transition-colors">
+        <ArrowLeft className="w-4 h-4" /> Voltar ao Dashboard
+      </Link>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: mod.color }}>{mod.name}</h1>
