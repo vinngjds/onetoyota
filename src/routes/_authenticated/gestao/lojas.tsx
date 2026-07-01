@@ -60,8 +60,8 @@ function GestaoLojas() {
   });
 
   const updateStore = useMutation({
-    mutationFn: async (p: { id: string; name: string; code: string | null }) => {
-      const { error } = await supabase.from("stores").update({ name: p.name, code: p.code }).eq("id", p.id);
+    mutationFn: async (p: { id: string; name: string; code: string | null; region: string | null }) => {
+      const { error } = await supabase.from("stores").update({ name: p.name, code: p.code, region: p.region } as any).eq("id", p.id);
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["gestao-stores"] }); qc.invalidateQueries({ queryKey: ["my-stores"] }); toast.success("Loja atualizada"); },
