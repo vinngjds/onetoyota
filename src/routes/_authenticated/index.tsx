@@ -1,13 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { usePeriod, useSelectedStoreId } from "@/lib/session";
+import { usePeriod, useSelectedStoreId, useIsGestao } from "@/lib/session";
 import { Card } from "@/components/ui/card";
 import { Shield, TrendingUp, Users, Package, ArrowRight } from "lucide-react";
 import { pointsFrom, resolveTarget, classifyScore, type Indicator, type TargetRow } from "@/lib/scoring";
+import { GestaoOverview } from "@/components/GestaoOverview";
 
 export const Route = createFileRoute("/_authenticated/")({
-  component: Dashboard,
+  component: DashboardSwitch,
 });
 
 const ICONS: Record<string, any> = {
@@ -17,7 +18,13 @@ const ICONS: Record<string, any> = {
   "value-chain": Package,
 };
 
-function Dashboard() {
+function DashboardSwitch() {
+  const { isGestao, loading } = useIsGestao();
+  if (loading) return <div className="text-slate-500">Carregando...</div>;
+  return isGestao ? <GestaoOverview /> : <LTDashboard />;
+}
+
+function LTDashboard() {
   const period = usePeriod();
   const storeId = useSelectedStoreId();
 
