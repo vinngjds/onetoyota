@@ -139,7 +139,7 @@ function GestaoLojas() {
             <Card key={s.id} className="p-5">
               <StoreHeader
                 store={s}
-                onSave={(name, code) => updateStore.mutate({ id: s.id, name, code: code || null })}
+                onSave={(name, code, region) => updateStore.mutate({ id: s.id, name, code: code || null, region: region || null })}
                 onDelete={() => confirm("Remover loja?") && delStore.mutate(s.id)}
               />
 
