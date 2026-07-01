@@ -145,13 +145,26 @@ export function GestaoOverview() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
+          <Select value={region} onValueChange={setRegion}>
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder="Região" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as regiões</SelectItem>
+              {regions.map((r) => (
+                <SelectItem key={r} value={r}>
+                  {r}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Select value={sort} onValueChange={(v) => setSort(v as any)}>
             <SelectTrigger className="w-44">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="name">Ordenar por nome</SelectItem>
               <SelectItem value="pct">Ordenar por atingimento</SelectItem>
+              <SelectItem value="name">Ordenar por nome</SelectItem>
             </SelectContent>
           </Select>
         </div>
