@@ -1,39 +1,34 @@
-## Escopo
+# Importação do histórico — Loja Vitória (Jan a Jun/2026)
 
-1. **Dashboard = visão da LT** (mantido como está). Uma visão de Gestão será criada em outro turno.
-2. **Sidebar da LT**: remover os 4 links de módulos. Manter apenas **Dashboard** e **Histórico**. Cards do Dashboard continuam clicáveis e abrem `/modulo/$slug`.
-3. **Sidebar da Gestão**: mantém Consolidado, Lojas & LTs, Indicadores, Metas.
-4. **Cadastro das 21 lojas** (sem código, sem LT): Vila Velha, Pampulha, Contagem, G. Valadares, Manhuaçu, Ipatinga, Juiz de Fora, Vitória, Linhares, Carandaí, Serra, Muriaé, Sete Lagoas, GAB, Uberlândia JP, Colatina, SIA, Cachoeiro, Uberaba, Patos, Épia, Taguatinga, Uberlândia JN.
-5. **Cadastro dos indicadores** por módulo (pontuação / meta padrão / subgrupo). Unidades: `percent` (%), `currency` (R$), `number`, `boolean` (SIM/NÃO).
+## Objetivo
+Popular `indicator_entries` com os 6 primeiros meses de 2026 da loja Vitória, replicando exatamente as pontuações mostradas nas planilhas, para que o Dashboard, Histórico e Consolidado exibam dados reais para teste.
 
-### Segurança, Qualidade e ESG (12 pts)
-- **NPS de Vendas**: Média Móvel (2 / 96%), Média Trimestral (1 / 96%)
-- **NPS de Serviços**: Média Móvel (2 / 92%), Média Trimestral (1 / 92%)
-- **FIR**: Média Móvel (1 / 93%), Média Trimestral (0,5 / 93%)
-- **FIR de Reparo**: Média Móvel (1 / 90%), Média Trimestral (0,5 / 90%)
-- **ESG Programs** (boolean): 100% KPI's Ambientais (0,20), 100% DERAP (0,20), ISO 14001 (0,50), Relatório Sustentabilidade (0,10)
-- **Trilha de Vendas Online**: Trilha Consultor de Vendas VN (0,10 / 80%), Trilha Consultor de Vendas VD (0,03 / 80%), Trilha Entregador Técnico (0,03 / 2), Trilha Vendas EAD (0,10 / 100%)
-- **Trilha de Vendas Presencial**: Consultor de Vendas VN (0,12 / 2), Avaliador de Usados (0,12 / 1), Novos Produtos e Processos 2026 (0,10 / 100%)
-- **Trilha de Pós-Vendas Online**: Trilha Representante CR (0,10 / 1), Trilha de Serviços EAD (0,10 / 100%)
-- **Trilha de Pós-Vendas Presencial**: Consultor de Serviços (0,20 / 60%), Representante CR (0,10 / 1), Novos Produtos e Processos 2026 (0,10 / 100%)
-- **Team GP Online**: G4 (0,04 / 80%), G3 (0,04 / 60%), G2 (EL+MO+CH) (0,04 / 40%), G1 (MS+ESP) (0,04 / 2), Trilha Pré-LQS (0,04 / 2), Trilha LQS (0,04 / 1)
-- **Team GP Presencial**: G4 (0,10 / 80%), G3 (0,10 / 2), G2 (EL) (0,10 / 1), G2 (EL+MO+CH) (0,10 / 1), G1 (MS+ESP) (0,10 / 1), LQS (0,06 / 1)
+## Estratégia de conversão
+Como as colunas mensais dos prints já são **pontuações calculadas** (ex.: Yaris Cross = 3,00 pts), farei engenharia reversa para gravar um `realizado` equivalente:
 
-### Vendas (23 pts)
-- **Vendas Varejo**: Yaris Cross (0), Corolla SD (3/6), Corolla Cross (3/17), Hilux (5/14), SW4 (1/9), RAV4 (1/9)
-- **Vendas Diretas**: Faturamento Hilux (4/14), Faturamento Hiace Commuter (2/2), Cancelamento Hilux (1/2,80)
-- **Collaboration** (sem subgrupo): (1/30,06)
-- **Ciclo Toyota**: Penetração (1/8,25), Renovação (1/4%)
+- `pct = pontos_do_mes / max_points` do indicador
+- `realizado = pct × meta_efetiva` (meta da loja, se houver override, senão `default_target`)
+- Para indicadores `boolean`: `realizado = 1` se pontos > 0, senão `0`
+- Para indicadores sem meta (`number` sem target claro): `realizado = pontos_do_mes` (mantém proporção 1:1 quando `max_points = target`)
 
-### Retenção (30 pts)
-Retenção Total (11/100%), CPUS CSR+CSP (4/1503), TKT Médio CSR+CSP (2/R$1.200), BPUS (4/114), Retenção Funilaria CFS (3/37,97%), TKT Médio Funilaria (2/R$14.000), Toyota 10 (3/272), Agendamento Ativo CRM (1/20%).
+Isso garante que `pointsFrom()` recalcule exatamente o valor original do print.
 
-### Value Chain (35 pts)
-Seminovo Certificado TCUV (4/12), Seminovo Certificado Simplificada (1/0), Ciclo Toyota Usados (1/9%), Venda Usados Toyota (2/35%), Trade-in (2/22), Acessórios PNV (3/R$228.900), Acessórios % Genuínos (1/90%), **Revisão na Medida**: 03 ou mais revisões (2/10,05) + a partir da 4ª (2/4,02), Times Sales (2/75%), Consórcio Toyota (2/9), Seguro Toyota Novos (2/9,35), Seguro Toyota Renovação (1/75%), KINTO One Fleet Net Bookings (2/100%), KINTO One Fleet Gross Bookings (1/100%), KINTO One Personal (2/2), KINTO Share Bookings (1/20), KINTO Share Tx Ocupação (1/50%), NPS KINTO (1/93%), Onboarding Connected e Renovação (2/90%).
+## Projeção
+Coluna **PROJEÇÃO 2026** de cada linha será replicada em todos os 6 meses no campo `projecao` (mesma conversão acima).
 
-## Detalhes técnicos
+## Escopo dos dados
+- **Loja:** Vitória (buscar por `name = 'Vitória'`)
+- **Período:** 2026-01 a 2026-06
+- **Indicadores:** todos os 76 já cadastrados no catálogo, cobrindo os 4 módulos
+- **Origem:** transcrição manual dos dois prints anexados (imagens `image-2.png` e `image-3.png`)
 
-- **AppShell** (`src/components/AppShell.tsx`): remover o array `MODULE_LINKS` do render para LT; manter Dashboard e Histórico. Bloco `if (isGestao)` intacto. Rota `/modulo/$slug` permanece (acessada via cards do Dashboard).
-- **Migração 1 – lojas**: INSERT em `stores(name)` para as 21 lojas.
-- **Migração 2 – indicadores**: INSERT em `indicators(module_id, name, subgroup, max_points, default_target, unit, sort_order)` resolvendo `module_id` via `(SELECT id FROM modules WHERE slug = ...)`.
-- Nada muda em RLS, Histórico, tela de módulo ou lógica de scoring.
+## Execução técnica
+1. Leitura completa dos prints para montar uma tabela `{indicator_name, subgroup, module, projecao, jan..jun}` em pontos.
+2. Match dos indicadores por `(module_slug, subgroup, name)` para obter `id`, `max_points`, `default_target`, `unit`.
+3. Geração de INSERTs em lote no `indicator_entries` (`ON CONFLICT (store_id, indicator_id, period_year, period_month) DO UPDATE`) com os campos `realizado` e `projecao` convertidos.
+4. Verificação: consultar totais por mês e comparar com a linha de totais de cada módulo do print (QUALIDADE E ESG 12,00 / VENDAS 23,00 / RETENÇÃO 30,00 / VALUE CHAIN 35,00) — tolerância de arredondamento ~0,05 pts.
+
+## Observações
+- Nenhuma alteração de schema, UI ou lógica de scoring.
+- Só afeta a loja Vitória; demais lojas permanecem vazias.
+- Caso algum indicador do print não exista no catálogo (ex.: "Pontos Extras — B&P In House", "Modernização 25"), listo ao final para você decidir se cadastramos.
