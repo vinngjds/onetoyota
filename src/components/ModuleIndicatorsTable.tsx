@@ -87,6 +87,12 @@ export function ModuleSection({
 
   const groups = new Map<string, Indicator[]>();
   indicators.forEach((ind) => {
+    if (statusFilter !== "all") {
+      const t = resolveTarget(ind, targets as TargetRow[], year, month);
+      const e = entryMap.get(ind.id);
+      const st = deliveryStatus(ind, e?.realizado != null ? Number(e.realizado) : null, t);
+      if (st !== statusFilter) return;
+    }
     const g = ind.subgroup ?? "Geral";
     if (!groups.has(g)) groups.set(g, []);
     groups.get(g)!.push(ind);
