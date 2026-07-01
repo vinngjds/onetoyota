@@ -204,3 +204,57 @@ function GestaoLojas() {
     </div>
   );
 }
+
+function StoreHeader({
+  store,
+  onSave,
+  onDelete,
+}: {
+  store: { id: string; name: string; code: string | null };
+  onSave: (name: string, code: string) => void;
+  onDelete: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState(store.name);
+  const [code, setCode] = useState(store.code ?? "");
+
+  if (editing) {
+    return (
+      <div className="flex items-start gap-2">
+        <div className="flex-1">
+          <Label className="text-xs">Nome</Label>
+          <Input className="h-8" value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+        <div className="w-40">
+          <Label className="text-xs">Código</Label>
+          <Input className="h-8" value={code} onChange={(e) => setCode(e.target.value)} />
+        </div>
+        <div className="flex items-end gap-1 pb-0.5">
+          <Button variant="ghost" size="sm" onClick={() => { onSave(name, code); setEditing(false); }}>
+            <Check className="w-4 h-4 text-green-600" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => { setName(store.name); setCode(store.code ?? ""); setEditing(false); }}>
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-start justify-between">
+      <div>
+        <div className="font-semibold">{store.name}</div>
+        <div className="text-xs text-slate-500">{store.code || "sem código"}</div>
+      </div>
+      <div className="flex gap-1">
+        <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
+          <Pencil className="w-4 h-4" />
+        </Button>
+        <Button variant="ghost" size="sm" onClick={onDelete}>
+          <Trash2 className="w-4 h-4 text-red-500" />
+        </Button>
+      </div>
+    </div>
+  );
+}
