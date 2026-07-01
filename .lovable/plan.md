@@ -1,32 +1,51 @@
-## 1. Botão "Voltar" na página do módulo
+## Nova visão da Gestão
 
-Em `src/routes/_authenticated/modulo.$slug.tsx`, adicionar no topo (acima do título do módulo) um botão "← Voltar ao Dashboard" usando `<Link to="/">` do TanStack Router, com ícone `ArrowLeft` do lucide. Fica alinhado à esquerda, discreto, sempre visível ao entrar em Vendas / Retenção / Value Chain / SQE.
+Criar experiência dedicada para usuários com role `gestao`, mantendo a LT intacta. O foco é transformar o painel principal em um "grid de lojas" e permitir drill-down por loja com edição completa.
 
-## 2. Modo de edição em "Metas por loja"
+### 1. Painel Gestão (`/` para role gestao)
 
-Em `src/routes/_authenticated/gestao/metas.tsx`:
+Detectar role em `src/routes/_authenticated/index.tsx`. Se `gestao`, renderizar novo componente `GestaoOverview`; se `lt`, manter Dashboard atual.
 
-- Hoje cada linha já tem input editável salvando no `onBlur`. O problema é que a meta é **anual** (sem período) — a mesma vale para todos os meses.
-- Adicionar por linha um botão **Editar** (lápis) que abre um pequeno popover/dialog com duas opções:
-  - **Aplicar somente ao mês selecionado** (usa o mês/ano do seletor global do AppShell) — grava um override mensal.
-  - **Aplicar a todos os meses (padrão da loja)** — grava o override anual atual (comportamento existente).
-- Mostrar ao lado da meta: badge "padrão" ou "mês X/AAAA" indicando a origem do valor exibido.
+`GestaoOverview` mostra um **grid de cards de lojas** (3 colunas desktop, inspirado no layout de "Projects" da referência):
 
-**Mudança de schema necessária:** adicionar colunas opcionais `period_year` e `period_month` (nullable) em `store_indicator_targets` e trocar o unique para `(store_id, indicator_id, period_year, period_month)` tratando NULL como "padrão anual". O `effectiveTarget` em `src/lib/scoring.ts` e as queries de módulo/dashboard/consolidado passam a preferir o override do mês atual, caindo para o anual, caindo para `default_target`.
+- Cabeçalho de cada card: nome da loja (destaque) + "LT: Fulana" em fonte pequena/muted (ou "Sem LT" quando não atribuída).
+- 4 mini-barras horizontais, uma por macro indicador (Segurança/Qualidade/ESG, Vendas, Retenção, Value Chain), cada uma com:
+  - ícone + nome curto
+  - `pontos realizados / máx` e `%`
+  - barra na cor do módulo
+- Rodapé do card: pontuação total + classificação (badge colorido A/B/C/D), similar ao card atual da LT.
+- Card inteiro clicável → navega para `/gestao/loja/$storeId`.
 
-## 3. Botão Editar em "Indicadores" (catálogo)
+Filtros no topo: busca por nome de loja + período (já existe no AppShell). Ordenação por nome (default) ou por % realizado.
 
-Em `src/routes/_authenticated/gestao/indicadores.tsx`, cada linha ganha um botão **Editar** (lápis) que transforma a linha em modo edição inline (mesmos campos do formulário de criação: subgrupo, nome, pontuação, meta padrão, tipo, ordem), com botões Salvar / Cancelar. Persiste via `update` na tabela `indicators`.
+Reaproveitar `resolveTarget`, `pointsFrom`, `classifyScore` — uma única query buscando stores + assignments + profiles (para nome da LT) + indicators + targets + entries do mês.
 
-## 4. Botão Editar em "Lojas & LTs"
+### 2. Drill-down da loja (`/gestao/loja/$storeId`)
 
-Em `src/routes/_authenticated/gestao/lojas.tsx`, cada card de loja ganha um botão **Editar** no cabeçalho que permite alterar `name` e `code` inline (input + Salvar / Cancelar). Atribuição de LTs continua como está.
+Nova rota que replica visualmente o Dashboard da LT e a listagem de indicadores, com a loja fixada pela URL (ignora o `selectedStoreId` global só nessa tela):
 
-## Detalhes técnicos
+- Cabeçalho: nome da loja + LT responsável + botão "← Voltar" para `/`.
+- 3 cards de topo (Realizado / Projeção / Classificação) — mesmos do Dashboard LT.
+- **Filtro de macro indicador**: `Select` com opções "Todos" (default), "Segurança, Qualidade e ESG", "Vendas", "Retenção", "Value Chain".
+- Listagem:
+  - Quando "Todos": renderiza os 4 módulos empilhados, cada um com sua tabela completa de subtarefas (mesmo componente da tela `/modulo/$slug`).
+  - Quando um módulo específico: mostra só aquele módulo.
+- **Edição inline liberada**: os inputs de Realizado e Projeção são editáveis, salvando em `indicator_entries` para a loja do URL. RLS já permite gestão editar qualquer loja.
 
-- Migration: alterar `store_indicator_targets` (nullable period_year/month + novo unique). Manter linhas existentes como "padrão anual" (period_year/month = NULL).
-- `scoring.effectiveTarget(ind, override)` passa a receber o override já resolvido pela query (mês → anual → default), sem mudar assinatura pública se possível.
-- Dashboard (`index.tsx`), módulo (`modulo.$slug.tsx`), histórico e consolidado: adaptar as queries de `store_indicator_targets` para trazer ambos (mês corrente + anuais) e resolver no cliente.
-- UI de edição usa `Dialog` do shadcn onde couber, ou modo inline nas tabelas para não pesar.
+### 3. Refatoração de componente
 
-Pergunta rápida antes de eu executar: quando você editar a meta "somente para o mês selecionado", o valor deve **substituir** o padrão só naquele mês (padrão continua valendo nos outros), ou você quer também poder editar mês a mês individualmente no futuro? Vou assumir a primeira (override pontual do mês, com fallback ao anual), a menos que diga o contrário.
+Extrair o corpo da tabela de indicadores de `src/routes/_authenticated/modulo.$slug.tsx` para `src/components/ModuleIndicatorsTable.tsx` (props: `storeId`, `moduleSlug`, `year`, `month`). Reutilizar na rota de módulo da LT e na nova tela de gestão para evitar duplicação.
+
+### 4. Sidebar & navegação
+
+Em `AppShell`, para role `gestao`:
+- Manter "Painel" (agora é o novo overview) e "Histórico".
+- Manter as entradas de Gestão (Consolidado, Metas, Indicadores, Lojas & LTs) já existentes.
+- Ocultar o seletor global de loja quando estivermos em `/gestao/loja/$storeId` (a loja vem da URL).
+
+### Detalhes técnicos
+
+- Arquivos novos: `src/routes/_authenticated/gestao/loja.$storeId.tsx`, `src/components/GestaoOverview.tsx`, `src/components/ModuleIndicatorsTable.tsx`.
+- Arquivos alterados: `src/routes/_authenticated/index.tsx` (switch por role), `src/routes/_authenticated/modulo.$slug.tsx` (usa componente extraído), `src/components/AppShell.tsx` (ajustes menores de menu).
+- Sem migrações de banco — RLS de gestão já cobre leitura/escrita em todas as lojas.
+- Identidade visual mantida (mesmas cores de módulo, cards arredondados, badges de classificação).
