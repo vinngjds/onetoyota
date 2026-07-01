@@ -138,7 +138,7 @@ function ModulePage() {
               </thead>
               <tbody>
                 {inds.map((ind) => {
-                  const t = effectiveTarget(ind, targetMap.get(ind.id));
+                  const t = resolveTarget(ind, targets as TargetRow[], period.year, period.month);
                   const e = entryMap.get(ind.id);
                   return (
                     <IndicatorRow
