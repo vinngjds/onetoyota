@@ -37,11 +37,11 @@ function GestaoConsolidado() {
   const maxTotal = indicators.reduce((s, i) => s + Number(i.max_points), 0);
 
   const rows = stores.map((s) => {
-    const stTargets = new Map(targets.filter((t) => t.store_id === s.id).map((t) => [t.indicator_id, Number(t.target)]));
+    const stTargets = (targets as TargetRow[]).filter((t) => (t as any).store_id === s.id);
     const stEntries = new Map(entries.filter((e) => e.store_id === s.id).map((e) => [e.indicator_id, e]));
     let real = 0, proj = 0;
     indicators.forEach((ind) => {
-      const t = effectiveTarget(ind, stTargets.get(ind.id));
+      const t = resolveTarget(ind, stTargets, period.year, period.month);
       const e = stEntries.get(ind.id);
       real += pointsFrom(ind, e?.realizado != null ? Number(e.realizado) : null, t);
       proj += pointsFrom(ind, e?.projecao != null ? Number(e.projecao) : (e?.realizado != null ? Number(e.realizado) : null), t);
