@@ -106,21 +106,23 @@ export function AppShell({ children }: { children: ReactNode }) {
         <header className="h-16 bg-white border-b border-slate-200 flex items-center px-6 gap-4">
           <div className="flex-1" />
           <div className="flex items-center gap-2">
-            <Select
-              value={storeId ?? undefined}
-              onValueChange={(v) => setSelectedStoreId(v)}
-            >
-              <SelectTrigger className="w-56">
-                <SelectValue placeholder={storesQ.data?.length ? "Selecionar loja" : "Sem lojas"} />
-              </SelectTrigger>
-              <SelectContent>
-                {storesQ.data?.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    {s.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {!isGestao && (
+              <Select
+                value={storeId ?? undefined}
+                onValueChange={(v) => setSelectedStoreId(v)}
+              >
+                <SelectTrigger className="w-56">
+                  <SelectValue placeholder={storesQ.data?.length ? "Selecionar loja" : "Sem lojas"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {storesQ.data?.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <Select
               value={String(period.month)}
               onValueChange={(v) => setPeriod({ ...period, month: Number(v) })}
@@ -149,6 +151,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Select>
           </div>
         </header>
+
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>

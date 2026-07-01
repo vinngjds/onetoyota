@@ -18,6 +18,7 @@ import { Route as AuthenticatedModuloSlugRouteImport } from './routes/_authentic
 import { Route as AuthenticatedGestaoMetasRouteImport } from './routes/_authenticated/gestao/metas'
 import { Route as AuthenticatedGestaoLojasRouteImport } from './routes/_authenticated/gestao/lojas'
 import { Route as AuthenticatedGestaoIndicadoresRouteImport } from './routes/_authenticated/gestao/indicadores'
+import { Route as AuthenticatedGestaoLojaStoreIdRouteImport } from './routes/_authenticated/gestao/loja.$storeId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -67,6 +68,12 @@ const AuthenticatedGestaoIndicadoresRoute =
     path: '/gestao/indicadores',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedGestaoLojaStoreIdRoute =
+  AuthenticatedGestaoLojaStoreIdRouteImport.update({
+    id: '/gestao/loja/$storeId',
+    path: '/gestao/loja/$storeId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -77,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/gestao/metas': typeof AuthenticatedGestaoMetasRoute
   '/modulo/$slug': typeof AuthenticatedModuloSlugRoute
   '/gestao/': typeof AuthenticatedGestaoIndexRoute
+  '/gestao/loja/$storeId': typeof AuthenticatedGestaoLojaStoreIdRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -87,6 +95,7 @@ export interface FileRoutesByTo {
   '/gestao/metas': typeof AuthenticatedGestaoMetasRoute
   '/modulo/$slug': typeof AuthenticatedModuloSlugRoute
   '/gestao': typeof AuthenticatedGestaoIndexRoute
+  '/gestao/loja/$storeId': typeof AuthenticatedGestaoLojaStoreIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -99,6 +108,7 @@ export interface FileRoutesById {
   '/_authenticated/gestao/metas': typeof AuthenticatedGestaoMetasRoute
   '/_authenticated/modulo/$slug': typeof AuthenticatedModuloSlugRoute
   '/_authenticated/gestao/': typeof AuthenticatedGestaoIndexRoute
+  '/_authenticated/gestao/loja/$storeId': typeof AuthenticatedGestaoLojaStoreIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/gestao/metas'
     | '/modulo/$slug'
     | '/gestao/'
+    | '/gestao/loja/$storeId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/gestao/metas'
     | '/modulo/$slug'
     | '/gestao'
+    | '/gestao/loja/$storeId'
   id:
     | '__root__'
     | '/_authenticated'
@@ -132,6 +144,7 @@ export interface FileRouteTypes {
     | '/_authenticated/gestao/metas'
     | '/_authenticated/modulo/$slug'
     | '/_authenticated/gestao/'
+    | '/_authenticated/gestao/loja/$storeId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -204,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGestaoIndicadoresRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/gestao/loja/$storeId': {
+      id: '/_authenticated/gestao/loja/$storeId'
+      path: '/gestao/loja/$storeId'
+      fullPath: '/gestao/loja/$storeId'
+      preLoaderRoute: typeof AuthenticatedGestaoLojaStoreIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -215,6 +235,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedGestaoMetasRoute: typeof AuthenticatedGestaoMetasRoute
   AuthenticatedModuloSlugRoute: typeof AuthenticatedModuloSlugRoute
   AuthenticatedGestaoIndexRoute: typeof AuthenticatedGestaoIndexRoute
+  AuthenticatedGestaoLojaStoreIdRoute: typeof AuthenticatedGestaoLojaStoreIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -225,6 +246,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedGestaoMetasRoute: AuthenticatedGestaoMetasRoute,
   AuthenticatedModuloSlugRoute: AuthenticatedModuloSlugRoute,
   AuthenticatedGestaoIndexRoute: AuthenticatedGestaoIndexRoute,
+  AuthenticatedGestaoLojaStoreIdRoute: AuthenticatedGestaoLojaStoreIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
