@@ -25,7 +25,8 @@ const ICONS: Record<string, any> = {
 export function GestaoOverview() {
   const period = usePeriod();
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<"name" | "pct">("name");
+  const [region, setRegion] = useState<string>("all");
+  const [sort, setSort] = useState<"name" | "pct">("pct");
 
   const q = useQuery({
     queryKey: ["gestao-overview", period.year, period.month],
