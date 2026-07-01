@@ -66,15 +66,61 @@ function GestaoMetas() {
     mutationFn: async (p: {
       indicator_id: string;
       target: number;
-      period_year: number | null;
-      period_month: number | null;
+      scope: "monthly" | "annual" | "all_stores_monthly" | "all_stores_default";
     }) => {
-      // Manual upsert (unique index uses COALESCE, so onConflict isn't declared)
+      if (p.scope === "all_stores_default") {
+        // Meta padrão global do indicador + remove overrides em todas as lojas
+        const { error: e1 } = await supabase
+          .from("indicators")
+          .update({ default_target: p.target } as any)
+          .eq("id", p.indicator_id);
+        if (e1) throw e1;
+        const { error: e2 } = await supabase
+          .from("store_indicator_targets")
+          .delete()
+          .eq("indicator_id", p.indicator_id);
+        if (e2) throw e2;
+        return;
+      }
+      if (p.scope === "all_stores_monthly") {
+        // Upsert por loja no mês selecionado
+        const stores = storesQ.data ?? [];
+        for (const s of stores) {
+          const { data: existing } = await supabase
+            .from("store_indicator_targets")
+            .select("id")
+            .eq("store_id", s.id)
+            .eq("indicator_id", p.indicator_id)
+            .eq("period_year", period.year)
+            .eq("period_month", period.month)
+            .maybeSingle();
+          if (existing) {
+            const { error } = await supabase
+              .from("store_indicator_targets")
+              .update({ target: p.target } as any)
+              .eq("id", existing.id);
+            if (error) throw error;
+          } else {
+            const { error } = await supabase.from("store_indicator_targets").insert({
+              store_id: s.id,
+              indicator_id: p.indicator_id,
+              target: p.target,
+              period_year: period.year,
+              period_month: period.month,
+            } as any);
+            if (error) throw error;
+          }
+        }
+        return;
+      }
+      // Escopos por loja atual
+      const period_year = p.scope === "monthly" ? period.year : null;
+      const period_month = p.scope === "monthly" ? period.month : null;
       const existing = (q.data?.targets ?? []).find(
         (t) =>
           t.indicator_id === p.indicator_id &&
-          t.period_year === p.period_year &&
-          t.period_month === p.period_month,
+          t.period_year === period_year &&
+          t.period_month === period_month,
       );
       if (existing) {
         const { error } = await supabase
@@ -87,13 +133,17 @@ function GestaoMetas() {
           store_id: storeId,
           indicator_id: p.indicator_id,
           target: p.target,
-          period_year: p.period_year,
-          period_month: p.period_month,
+          period_year,
+          period_month,
         } as any);
         if (error) throw error;
       }
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["gestao-metas", storeId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["gestao-metas", storeId] });
+      qc.invalidateQueries({ queryKey: ["gestao-overview"] });
+      toast.success("Meta atualizada");
+    },
     onError: (e: any) => toast.error(e.message),
   });
 
