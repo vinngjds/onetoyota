@@ -43,10 +43,10 @@ function GestaoLojas() {
 
   const addStore = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("stores").insert({ name, code: code || null });
+      const { error } = await supabase.from("stores").insert({ name, code: code || null, region: region || null } as any);
       if (error) throw error;
     },
-    onSuccess: () => { setName(""); setCode(""); qc.invalidateQueries({ queryKey: ["gestao-stores"] }); qc.invalidateQueries({ queryKey: ["my-stores"] }); toast.success("Loja criada"); },
+    onSuccess: () => { setName(""); setCode(""); setRegion(""); qc.invalidateQueries({ queryKey: ["gestao-stores"] }); qc.invalidateQueries({ queryKey: ["my-stores"] }); toast.success("Loja criada"); },
     onError: (e: any) => toast.error(e.message),
   });
 
