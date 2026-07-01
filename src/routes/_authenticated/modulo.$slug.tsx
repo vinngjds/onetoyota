@@ -1,11 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePeriod, useSelectedStoreId, useCurrentUser } from "@/lib/session";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { pctReal, pointsFrom, effectiveTarget, type Indicator } from "@/lib/scoring";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { pctReal, pointsFrom, resolveTarget, type Indicator, type TargetRow } from "@/lib/scoring";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/modulo/$slug")({
