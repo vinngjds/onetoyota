@@ -5,10 +5,6 @@ import { useIsGestao, usePeriod, setPeriod, useSelectedStoreId, setSelectedStore
 import { useQuery } from "@tanstack/react-query";
 import {
   LayoutDashboard,
-  Shield,
-  TrendingUp,
-  Users,
-  Package,
   Store,
   Settings2,
   LogOut,
@@ -18,12 +14,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const MODULE_LINKS = [
-  { slug: "seguranca-qualidade-esg", label: "Segurança, Qualidade e ESG", icon: Shield },
-  { slug: "vendas", label: "Vendas", icon: TrendingUp },
-  { slug: "retencao", label: "Retenção", icon: Users },
-  { slug: "value-chain", label: "Value Chain", icon: Package },
-];
 
 const MONTHS = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
