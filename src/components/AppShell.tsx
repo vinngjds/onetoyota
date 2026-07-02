@@ -11,6 +11,7 @@ import {
   History,
   Target,
   Sparkles,
+  Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -74,6 +75,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           <NavItem to="/" icon={LayoutDashboard} label="Dashboard" />
           <NavItem to="/historico" icon={History} label="Histórico" />
+          {isGestao && <NavItem to="/resumo" icon={Trophy} label="Resumo" />}
 
           {isGestao && (
             <>
