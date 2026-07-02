@@ -1,28 +1,24 @@
 ## Objetivo
-Mover o "Ranking Macro" (componente `ClassificationRanking`) do Dashboard da Gestão para um novo módulo dedicado chamado **Resumo**, acessível pela sidebar logo abaixo de "Histórico".
+Reordenar a sidebar para que "Insights" apareça abaixo de "Resumo", fora do grupo "Gestão".
 
 ## Mudanças
 
-### 1. Dashboard da Gestão (`src/components/GestaoOverview.tsx`)
-- Remover o bloco:
-  ```
-  <h2>Classificação das lojas</h2>
-  <ClassificationRanking />
-  ```
-- Remover o import não utilizado de `ClassificationRanking`.
-- Mantém todo o restante (busca, filtros de região, ordenação, grid de cards das lojas).
+### `src/components/AppShell.tsx`
+- Mover `<NavItem to="/gestao/insights" icon={Sparkles} label="Insights" />` para logo abaixo do item "Resumo" (também restrito a `isGestao`).
+- Remover o item Insights de dentro do bloco "Gestão".
 
-### 2. Nova rota `/resumo` (`src/routes/_authenticated/resumo.tsx`)
-- Cria rota nova usando `createFileRoute("/_authenticated/resumo")`.
-- Renderiza um cabeçalho "Resumo — Classificação das lojas" + `<ClassificationRanking />` (3 tabelas: Mês, Acumulado, Projetado Ano).
-- `head()` com título/description próprios.
-- Acesso restrito ao perfil `gestao` (mesmo padrão usado em `insights.tsx` — redireciona ou mostra aviso se LT).
-
-### 3. Sidebar (AppShell)
-- Adicionar item "Resumo" na navegação da Gestão, posicionado imediatamente abaixo de "Histórico".
-- Ícone coerente com o restante (ex.: `BarChart3` ou `Trophy`).
-- Visível apenas para role `gestao` (LT continua com Dashboard + Histórico apenas).
+Ordem final da sidebar (Gestão):
+```
+Dashboard
+Histórico
+Resumo
+Insights
+--- Gestão ---
+Consolidado
+Lojas & LTs
+Indicadores
+Metas por loja
+```
 
 ## Fora do escopo
-- Nenhuma alteração de lógica de cálculo, dados ou banco.
-- Nenhuma alteração no comportamento do Histórico ou do Dashboard além da remoção do bloco de ranking.
+- Nenhuma alteração de rota, permissões ou lógica do módulo Insights.
