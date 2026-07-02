@@ -171,6 +171,11 @@ export function GestaoOverview() {
         </div>
       </div>
 
+      <div>
+        <h2 className="text-lg font-semibold mb-3">Classificação das lojas</h2>
+        <ClassificationRanking />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filtered.map((r) => (
           <Link
