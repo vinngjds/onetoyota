@@ -94,12 +94,8 @@ function InsightsPage() {
         supabase
           .from("indicator_entries")
           .select("*")
-          .or(
-            `and(period_year.gt.${startYear}),and(period_year.eq.${startYear},period_month.gte.${startMonth})`,
-          )
-          .or(
-            `and(period_year.lt.${period.year}),and(period_year.eq.${period.year},period_month.lte.${period.month})`,
-          ),
+          .gte("period_year", startYear)
+          .lte("period_year", period.year),
         supabase.from("classification_bands").select("*"),
       ]);
       return {
