@@ -459,7 +459,7 @@ function InsightsPage() {
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex gap-1">
-                      {r.timeline.map((t, i) => (
+                      {r.timeline.map((t: { label: string; status: DeliveryStatus; pct: number | null }, i: number) => (
                         <span
                           key={i}
                           title={`${t.label}: ${t.status}${t.pct != null ? ` (${(t.pct * 100).toFixed(0)}%)` : ""}`}
