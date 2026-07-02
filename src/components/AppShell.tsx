@@ -76,6 +76,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <NavItem to="/" icon={LayoutDashboard} label="Dashboard" />
           <NavItem to="/historico" icon={History} label="Histórico" />
           {isGestao && <NavItem to="/resumo" icon={Trophy} label="Resumo" />}
+          {isGestao && <NavItem to="/gestao/insights" icon={Sparkles} label="Insights" />}
 
           {isGestao && (
             <>
@@ -83,10 +84,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                 Gestão
               </div>
               <NavItem to="/gestao" icon={LayoutDashboard} label="Consolidado" />
-              <NavItem to="/gestao/insights" icon={Sparkles} label="Insights" />
               <NavItem to="/gestao/lojas" icon={Store} label="Lojas & LTs" />
               <NavItem to="/gestao/indicadores" icon={Settings2} label="Indicadores" />
               <NavItem to="/gestao/metas" icon={Target} label="Metas por loja" />
+
             </>
           )}
         </nav>
