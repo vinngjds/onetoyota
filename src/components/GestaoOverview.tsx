@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Shield, TrendingUp, Users, Package, Search, ArrowRight } from "lucide-react";
+import { ClassificationRanking } from "@/components/ClassificationRanking";
 import {
   classifyScore,
   pointsFrom,
@@ -168,6 +169,11 @@ export function GestaoOverview() {
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      <div>
+        <h2 className="text-lg font-semibold mb-3">Classificação das lojas</h2>
+        <ClassificationRanking />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

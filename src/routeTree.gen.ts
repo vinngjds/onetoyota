@@ -17,6 +17,7 @@ import { Route as AuthenticatedGestaoIndexRouteImport } from './routes/_authenti
 import { Route as AuthenticatedModuloSlugRouteImport } from './routes/_authenticated/modulo.$slug'
 import { Route as AuthenticatedGestaoMetasRouteImport } from './routes/_authenticated/gestao/metas'
 import { Route as AuthenticatedGestaoLojasRouteImport } from './routes/_authenticated/gestao/lojas'
+import { Route as AuthenticatedGestaoInsightsRouteImport } from './routes/_authenticated/gestao/insights'
 import { Route as AuthenticatedGestaoIndicadoresRouteImport } from './routes/_authenticated/gestao/indicadores'
 import { Route as AuthenticatedGestaoLojaStoreIdRouteImport } from './routes/_authenticated/gestao/loja.$storeId'
 
@@ -62,6 +63,12 @@ const AuthenticatedGestaoLojasRoute =
     path: '/gestao/lojas',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedGestaoInsightsRoute =
+  AuthenticatedGestaoInsightsRouteImport.update({
+    id: '/gestao/insights',
+    path: '/gestao/insights',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedGestaoIndicadoresRoute =
   AuthenticatedGestaoIndicadoresRouteImport.update({
     id: '/gestao/indicadores',
@@ -80,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/historico': typeof AuthenticatedHistoricoRoute
   '/gestao/indicadores': typeof AuthenticatedGestaoIndicadoresRoute
+  '/gestao/insights': typeof AuthenticatedGestaoInsightsRoute
   '/gestao/lojas': typeof AuthenticatedGestaoLojasRoute
   '/gestao/metas': typeof AuthenticatedGestaoMetasRoute
   '/modulo/$slug': typeof AuthenticatedModuloSlugRoute
@@ -91,6 +99,7 @@ export interface FileRoutesByTo {
   '/historico': typeof AuthenticatedHistoricoRoute
   '/': typeof AuthenticatedIndexRoute
   '/gestao/indicadores': typeof AuthenticatedGestaoIndicadoresRoute
+  '/gestao/insights': typeof AuthenticatedGestaoInsightsRoute
   '/gestao/lojas': typeof AuthenticatedGestaoLojasRoute
   '/gestao/metas': typeof AuthenticatedGestaoMetasRoute
   '/modulo/$slug': typeof AuthenticatedModuloSlugRoute
@@ -104,6 +113,7 @@ export interface FileRoutesById {
   '/_authenticated/historico': typeof AuthenticatedHistoricoRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/gestao/indicadores': typeof AuthenticatedGestaoIndicadoresRoute
+  '/_authenticated/gestao/insights': typeof AuthenticatedGestaoInsightsRoute
   '/_authenticated/gestao/lojas': typeof AuthenticatedGestaoLojasRoute
   '/_authenticated/gestao/metas': typeof AuthenticatedGestaoMetasRoute
   '/_authenticated/modulo/$slug': typeof AuthenticatedModuloSlugRoute
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/historico'
     | '/gestao/indicadores'
+    | '/gestao/insights'
     | '/gestao/lojas'
     | '/gestao/metas'
     | '/modulo/$slug'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/historico'
     | '/'
     | '/gestao/indicadores'
+    | '/gestao/insights'
     | '/gestao/lojas'
     | '/gestao/metas'
     | '/modulo/$slug'
@@ -140,6 +152,7 @@ export interface FileRouteTypes {
     | '/_authenticated/historico'
     | '/_authenticated/'
     | '/_authenticated/gestao/indicadores'
+    | '/_authenticated/gestao/insights'
     | '/_authenticated/gestao/lojas'
     | '/_authenticated/gestao/metas'
     | '/_authenticated/modulo/$slug'
@@ -210,6 +223,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGestaoLojasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/gestao/insights': {
+      id: '/_authenticated/gestao/insights'
+      path: '/gestao/insights'
+      fullPath: '/gestao/insights'
+      preLoaderRoute: typeof AuthenticatedGestaoInsightsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/gestao/indicadores': {
       id: '/_authenticated/gestao/indicadores'
       path: '/gestao/indicadores'
@@ -231,6 +251,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHistoricoRoute: typeof AuthenticatedHistoricoRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedGestaoIndicadoresRoute: typeof AuthenticatedGestaoIndicadoresRoute
+  AuthenticatedGestaoInsightsRoute: typeof AuthenticatedGestaoInsightsRoute
   AuthenticatedGestaoLojasRoute: typeof AuthenticatedGestaoLojasRoute
   AuthenticatedGestaoMetasRoute: typeof AuthenticatedGestaoMetasRoute
   AuthenticatedModuloSlugRoute: typeof AuthenticatedModuloSlugRoute
@@ -242,6 +263,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHistoricoRoute: AuthenticatedHistoricoRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedGestaoIndicadoresRoute: AuthenticatedGestaoIndicadoresRoute,
+  AuthenticatedGestaoInsightsRoute: AuthenticatedGestaoInsightsRoute,
   AuthenticatedGestaoLojasRoute: AuthenticatedGestaoLojasRoute,
   AuthenticatedGestaoMetasRoute: AuthenticatedGestaoMetasRoute,
   AuthenticatedModuloSlugRoute: AuthenticatedModuloSlugRoute,
@@ -259,13 +281,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
