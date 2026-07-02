@@ -7,7 +7,6 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Shield, TrendingUp, Users, Package, Search, ArrowRight } from "lucide-react";
-import { ClassificationRanking } from "@/components/ClassificationRanking";
 import {
   classifyScore,
   pointsFrom,
