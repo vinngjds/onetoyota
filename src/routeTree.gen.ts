@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedResumoRouteImport } from './routes/_authenticated/resumo'
 import { Route as AuthenticatedHistoricoRouteImport } from './routes/_authenticated/historico'
 import { Route as AuthenticatedGestaoIndexRouteImport } from './routes/_authenticated/gestao/index'
 import { Route as AuthenticatedModuloSlugRouteImport } from './routes/_authenticated/modulo.$slug'
@@ -33,6 +34,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedResumoRoute = AuthenticatedResumoRouteImport.update({
+  id: '/resumo',
+  path: '/resumo',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedHistoricoRoute = AuthenticatedHistoricoRouteImport.update({
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/historico': typeof AuthenticatedHistoricoRoute
+  '/resumo': typeof AuthenticatedResumoRoute
   '/gestao/indicadores': typeof AuthenticatedGestaoIndicadoresRoute
   '/gestao/insights': typeof AuthenticatedGestaoInsightsRoute
   '/gestao/lojas': typeof AuthenticatedGestaoLojasRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/historico': typeof AuthenticatedHistoricoRoute
+  '/resumo': typeof AuthenticatedResumoRoute
   '/': typeof AuthenticatedIndexRoute
   '/gestao/indicadores': typeof AuthenticatedGestaoIndicadoresRoute
   '/gestao/insights': typeof AuthenticatedGestaoInsightsRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/historico': typeof AuthenticatedHistoricoRoute
+  '/_authenticated/resumo': typeof AuthenticatedResumoRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/gestao/indicadores': typeof AuthenticatedGestaoIndicadoresRoute
   '/_authenticated/gestao/insights': typeof AuthenticatedGestaoInsightsRoute
@@ -126,6 +135,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/historico'
+    | '/resumo'
     | '/gestao/indicadores'
     | '/gestao/insights'
     | '/gestao/lojas'
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/historico'
+    | '/resumo'
     | '/'
     | '/gestao/indicadores'
     | '/gestao/insights'
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/historico'
+    | '/_authenticated/resumo'
     | '/_authenticated/'
     | '/_authenticated/gestao/indicadores'
     | '/_authenticated/gestao/insights'
@@ -186,6 +198,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/resumo': {
+      id: '/_authenticated/resumo'
+      path: '/resumo'
+      fullPath: '/resumo'
+      preLoaderRoute: typeof AuthenticatedResumoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/historico': {
@@ -249,6 +268,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedHistoricoRoute: typeof AuthenticatedHistoricoRoute
+  AuthenticatedResumoRoute: typeof AuthenticatedResumoRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedGestaoIndicadoresRoute: typeof AuthenticatedGestaoIndicadoresRoute
   AuthenticatedGestaoInsightsRoute: typeof AuthenticatedGestaoInsightsRoute
@@ -261,6 +281,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHistoricoRoute: AuthenticatedHistoricoRoute,
+  AuthenticatedResumoRoute: AuthenticatedResumoRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedGestaoIndicadoresRoute: AuthenticatedGestaoIndicadoresRoute,
   AuthenticatedGestaoInsightsRoute: AuthenticatedGestaoInsightsRoute,
