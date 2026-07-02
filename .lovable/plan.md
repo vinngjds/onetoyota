@@ -1,51 +1,49 @@
-## Nova visão da Gestão
+## 1. Novo módulo `Insights` (somente Gestão)
 
-Criar experiência dedicada para usuários com role `gestao`, mantendo a LT intacta. O foco é transformar o painel principal em um "grid de lojas" e permitir drill-down por loja com edição completa.
+Rota: `src/routes/_authenticated/gestao/insights.tsx`. Item na sidebar visível apenas para role `gestao`.
 
-### 1. Painel Gestão (`/` para role gestao)
+Layout em 4 blocos empilhados, todos compartilhando os filtros do topo:
 
-Detectar role em `src/routes/_authenticated/index.tsx`. Se `gestao`, renderizar novo componente `GestaoOverview`; se `lt`, manter Dashboard atual.
+**Filtros globais do Insights**
+- Janela: últimos 3 / 6 / 12 meses (default 6), terminando no período selecionado no AppShell.
+- Região (mesmas opções do Painel de Gestão) + busca por loja.
+- Módulo (Todos / Segurança / Vendas / Retenção / Value Chain).
+- "Ocorrências mínimas" para considerar recorrente (default 3).
 
-`GestaoOverview` mostra um **grid de cards de lojas** (3 colunas desktop, inspirado no layout de "Projects" da referência):
+**Bloco A — Linha do tempo de pontuação e classificação**
+- Gráfico de linhas (recharts) com uma série por loja, eixo X = mês, eixo Y = % de atingimento total.
+- Legenda com badge de classificação (A/B/C/D) do mês mais recente ao lado do nome da loja.
+- Tooltip mostra pontos/máx e letra em cada ponto.
+- Toggle "Comparar por módulo" troca para 4 linhas do módulo (fixa uma loja no filtro).
 
-- Cabeçalho de cada card: nome da loja (destaque) + "LT: Fulana" em fonte pequena/muted (ou "Sem LT" quando não atribuída).
-- 4 mini-barras horizontais, uma por macro indicador (Segurança/Qualidade/ESG, Vendas, Retenção, Value Chain), cada uma com:
-  - ícone + nome curto
-  - `pontos realizados / máx` e `%`
-  - barra na cor do módulo
-- Rodapé do card: pontuação total + classificação (badge colorido A/B/C/D), similar ao card atual da LT.
-- Card inteiro clicável → navega para `/gestao/loja/$storeId`.
+**Bloco B — Ranking de lojas-problema**
+- Gráfico de barras horizontais: para cada loja, contagem de indicadores classificados como Não Entregue ou Parcial no somatório da janela.
+- Ordenado do pior para o melhor. Clique numa barra abre o Bloco D já filtrado por essa loja.
 
-Filtros no topo: busca por nome de loja + período (já existe no AppShell). Ordenação por nome (default) ou por % realizado.
+**Bloco C — Indicadores recorrentemente não batidos**
+- Tabela agrupada por Loja → Indicador com colunas: Módulo, Indicador, Ocorrências de Não Entregue, Ocorrências de Parcial, Último status, % médio de atingimento na janela, Meses (heatmap linha de bolinhas verde/amarelo/vermelho).
+- Só aparecem indicadores com `nao_entregue + parcial >= ocorrências mínimas`.
+- Ordenação por severidade (não entregue pesa mais).
 
-Reaproveitar `resolveTarget`, `pointsFrom`, `classifyScore` — uma única query buscando stores + assignments + profiles (para nome da LT) + indicators + targets + entries do mês.
+**Bloco D — Drill-down causa raiz**
+- Ao clicar num indicador da tabela do Bloco C, abre um painel lateral (Sheet) com: histórico do indicador naquela loja em todos os meses da janela (realizado, meta usada, pontos, status), média realizada, gap absoluto vs meta, e link "Editar na loja" para `/gestao/loja/$storeId?module=<slug>`.
 
-### 2. Drill-down da loja (`/gestao/loja/$storeId`)
+Todos os cálculos reusam `resolveTarget`, `pointsFrom`, `pctReal`, `deliveryStatus`, `classifyScore` — nenhuma regra nova de scoring.
 
-Nova rota que replica visualmente o Dashboard da LT e a listagem de indicadores, com a loja fixada pela URL (ignora o `selectedStoreId` global só nessa tela):
+## 2. Ranking macro no Dashboard
 
-- Cabeçalho: nome da loja + LT responsável + botão "← Voltar" para `/`.
-- 3 cards de topo (Realizado / Projeção / Classificação) — mesmos do Dashboard LT.
-- **Filtro de macro indicador**: `Select` com opções "Todos" (default), "Segurança, Qualidade e ESG", "Vendas", "Retenção", "Value Chain".
-- Listagem:
-  - Quando "Todos": renderiza os 4 módulos empilhados, cada um com sua tabela completa de subtarefas (mesmo componente da tela `/modulo/$slug`).
-  - Quando um módulo específico: mostra só aquele módulo.
-- **Edição inline liberada**: os inputs de Realizado e Projeção são editáveis, salvando em `indicator_entries` para a loja do URL. RLS já permite gestão editar qualquer loja.
+No `GestaoOverview`, adicionar acima do grid uma nova seção "Classificação das lojas" com 3 tabelas lado a lado (colapsam para tabs no mobile):
 
-### 3. Refatoração de componente
+- **Mês** — período selecionado no AppShell. Usa realizado do mês.
+- **Acumulado** — de Jan até o mês selecionado. Soma pontos e máx de cada mês.
+- **Projetado Ano** — Jan–Dez. Meses ≤ atual usam realizado; meses futuros assumem 100% de cada indicador (max_points). Divide pelo total anual (máx × 12).
 
-Extrair o corpo da tabela de indicadores de `src/routes/_authenticated/modulo.$slug.tsx` para `src/components/ModuleIndicatorsTable.tsx` (props: `storeId`, `moduleSlug`, `year`, `month`). Reutilizar na rota de módulo da LT e na nova tela de gestão para evitar duplicação.
+Cada tabela lista todas as lojas ordenadas por % desc, com colunas: Loja | % | Classificação (badge colorido A/B/C/D usando as faixas atuais). Visual espelha a imagem enviada (linhas coloridas conforme a letra).
 
-### 4. Sidebar & navegação
+## 3. Detalhes técnicos
 
-Em `AppShell`, para role `gestao`:
-- Manter "Painel" (agora é o novo overview) e "Histórico".
-- Manter as entradas de Gestão (Consolidado, Metas, Indicadores, Lojas & LTs) já existentes.
-- Ocultar o seletor global de loja quando estivermos em `/gestao/loja/$storeId` (a loja vem da URL).
-
-### Detalhes técnicos
-
-- Arquivos novos: `src/routes/_authenticated/gestao/loja.$storeId.tsx`, `src/components/GestaoOverview.tsx`, `src/components/ModuleIndicatorsTable.tsx`.
-- Arquivos alterados: `src/routes/_authenticated/index.tsx` (switch por role), `src/routes/_authenticated/modulo.$slug.tsx` (usa componente extraído), `src/components/AppShell.tsx` (ajustes menores de menu).
-- Sem migrações de banco — RLS de gestão já cobre leitura/escrita em todas as lojas.
-- Identidade visual mantida (mesmas cores de módulo, cards arredondados, badges de classificação).
+- Arquivos novos: `src/routes/_authenticated/gestao/insights.tsx`, `src/components/insights/ScoreTimeline.tsx`, `src/components/insights/StoreProblemsChart.tsx`, `src/components/insights/RecurringIssuesTable.tsx`, `src/components/insights/IndicatorDrilldownSheet.tsx`, `src/components/ClassificationRanking.tsx`.
+- Alterados: `src/components/AppShell.tsx` (novo link "Insights" para gestão), `src/components/GestaoOverview.tsx` (renderiza `ClassificationRanking` no topo).
+- Sem mudanças de schema, RLS ou seed — todos os dados necessários já existem em `indicator_entries`, `indicators`, `store_indicator_targets`, `stores`, `classification_bands`.
+- Uma query única no Insights: busca todas as entradas dos últimos 12 meses de todas as lojas, mais catálogo/metas/bands, e deriva timeline/ranking/recorrentes em memória com `useMemo`.
+- `recharts` já está no projeto (usado por shadcn/chart). Se não estiver, adicionar via `bun add recharts`.
