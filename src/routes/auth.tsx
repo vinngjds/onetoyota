@@ -135,7 +135,7 @@ function AuthPage() {
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center"><div className="w-full border-t" /></div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-2 text-slate-500">ou continue com</span>
+              <span className="bg-white/90 px-2 text-slate-500">ou continue com</span>
             </div>
           </div>
           <Button variant="outline" className="w-full" onClick={handleGoogle}>
