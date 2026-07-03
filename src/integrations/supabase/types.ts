@@ -137,7 +137,6 @@ export type Database = {
           name: string
           slug: string
           sort_order: number
-          store_type: string
         }
         Insert: {
           color?: string
@@ -145,7 +144,6 @@ export type Database = {
           name: string
           slug: string
           sort_order?: number
-          store_type?: string
         }
         Update: {
           color?: string
@@ -153,7 +151,6 @@ export type Database = {
           name?: string
           slug?: string
           sort_order?: number
-          store_type?: string
         }
         Relationships: []
       }
@@ -253,7 +250,6 @@ export type Database = {
           id: string
           name: string
           region: string | null
-          store_type: string
         }
         Insert: {
           code?: string | null
@@ -261,7 +257,6 @@ export type Database = {
           id?: string
           name: string
           region?: string | null
-          store_type?: string
         }
         Update: {
           code?: string | null
@@ -269,7 +264,6 @@ export type Database = {
           id?: string
           name?: string
           region?: string | null
-          store_type?: string
         }
         Relationships: []
       }

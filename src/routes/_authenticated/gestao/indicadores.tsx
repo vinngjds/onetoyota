@@ -85,30 +85,14 @@ function GestaoIndicadores() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["gestao-indicadores"] }),
   });
 
-  const [typeFilter, setTypeFilter] = useState<"all" | "toyota" | "lexus">("all");
-
   if (q.isLoading || !q.data) return <div className="text-slate-500">Carregando...</div>;
   const { modules, indicators } = q.data;
-  const filteredModules = modules.filter((m: any) => typeFilter === "all" || m.store_type === typeFilter);
 
   return (
     <div className="space-y-6 max-w-6xl">
-      <div className="flex items-end justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold">Catálogo de indicadores</h1>
-          <p className="text-slate-500">Gerencie os indicadores de cada módulo e defina metas padrão.</p>
-        </div>
-        <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
-          {(["all", "toyota", "lexus"] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTypeFilter(t)}
-              className={`px-3 py-1.5 text-sm rounded-md transition ${typeFilter === t ? "bg-white shadow font-semibold" : "text-slate-500 hover:text-slate-700"}`}
-            >
-              {t === "all" ? "Todos" : t === "toyota" ? "Toyota" : "Lexus"}
-            </button>
-          ))}
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold">Catálogo de indicadores</h1>
+        <p className="text-slate-500">Gerencie os indicadores de cada módulo e defina metas padrão.</p>
       </div>
 
       <Card className="p-5">
@@ -119,7 +103,7 @@ function GestaoIndicadores() {
             <Select value={form.module_id} onValueChange={(v) => setForm({ ...form, module_id: v })}>
               <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
               <SelectContent>
-                {filteredModules.map((m: any) => <SelectItem key={m.id} value={m.id}>{m.name} {m.store_type === "lexus" ? "(Lexus)" : "(Toyota)"}</SelectItem>)}
+                {modules.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -160,14 +144,11 @@ function GestaoIndicadores() {
         </div>
       </Card>
 
-      {filteredModules.map((m: any) => {
+      {modules.map((m) => {
         const list = indicators.filter((i) => i.module_id === m.id);
         return (
           <Card key={m.id} className="p-0 overflow-hidden">
-            <div className="px-5 py-3 border-b font-semibold flex items-center justify-between" style={{ color: m.color }}>
-              <span>{m.name}</span>
-              <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600">{m.store_type === "lexus" ? "Lexus" : "Toyota"}</span>
-            </div>
+            <div className="px-5 py-3 border-b font-semibold" style={{ color: m.color }}>{m.name}</div>
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-xs uppercase text-slate-500 border-b">

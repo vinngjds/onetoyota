@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useSelectedStoreId, useSelectedStoreType } from "@/lib/session";
+import { useSelectedStoreId } from "@/lib/session";
 import { Card } from "@/components/ui/card";
 import { classifyScore, resolveTarget, pointsFrom, type Indicator, type TargetRow } from "@/lib/scoring";
 
@@ -13,13 +13,12 @@ const MONTHS = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov
 
 function Historico() {
   const storeId = useSelectedStoreId();
-  const storeType = useSelectedStoreType();
   const q = useQuery({
-    queryKey: ["hist", storeId, storeType],
+    queryKey: ["hist", storeId],
     enabled: !!storeId,
     queryFn: async () => {
       const [inds, targets, entries, bands] = await Promise.all([
-        supabase.from("indicators").select("*, modules!inner(store_type)").eq("modules.store_type", storeType),
+        supabase.from("indicators").select("*"),
         supabase.from("store_indicator_targets").select("*").eq("store_id", storeId!),
         supabase.from("indicator_entries").select("*").eq("store_id", storeId!).order("period_year", { ascending: false }).order("period_month", { ascending: false }),
         supabase.from("classification_bands").select("*"),
