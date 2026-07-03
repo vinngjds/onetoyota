@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { usePeriod, useSelectedStoreId, useIsGestao } from "@/lib/session";
+import { usePeriod, useSelectedStoreId, useIsGestao, useSelectedStoreType } from "@/lib/session";
 import { Card } from "@/components/ui/card";
 import { Shield, TrendingUp, Users, Package, ArrowRight } from "lucide-react";
 import { pointsFrom, resolveTarget, classifyScore, type Indicator, type TargetRow } from "@/lib/scoring";
@@ -27,14 +27,15 @@ function DashboardSwitch() {
 function LTDashboard() {
   const period = usePeriod();
   const storeId = useSelectedStoreId();
+  const storeType = useSelectedStoreType();
 
   const dataQ = useQuery({
-    queryKey: ["dashboard", storeId, period.year, period.month],
+    queryKey: ["dashboard", storeId, storeType, period.year, period.month],
     enabled: !!storeId,
     queryFn: async () => {
       const [mods, inds, targets, entries, bands] = await Promise.all([
-        supabase.from("modules").select("*").order("sort_order"),
-        supabase.from("indicators").select("*").order("sort_order"),
+        supabase.from("modules").select("*").eq("store_type", storeType).order("sort_order"),
+        supabase.from("indicators").select("*, modules!inner(store_type)").eq("modules.store_type", storeType).order("sort_order"),
         supabase.from("store_indicator_targets").select("*").eq("store_id", storeId!),
         supabase.from("indicator_entries").select("*").eq("store_id", storeId!).eq("period_year", period.year).eq("period_month", period.month),
         supabase.from("classification_bands").select("*"),
