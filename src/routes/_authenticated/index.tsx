@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { usePeriod, useSelectedStoreId, useIsGestao } from "@/lib/session";
+import { usePeriod, useSelectedStoreId, useIsGestao, useSelectedStoreType } from "@/lib/session";
 import { Card } from "@/components/ui/card";
 import { Shield, TrendingUp, Users, Package, ArrowRight } from "lucide-react";
 import { pointsFrom, resolveTarget, classifyScore, type Indicator, type TargetRow } from "@/lib/scoring";
