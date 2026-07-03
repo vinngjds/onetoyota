@@ -83,3 +83,23 @@ export function useSelectedStoreId() {
   }, []);
   return s;
 }
+
+export type StoreType = "toyota" | "lexus";
+
+export function useSelectedStoreType(): StoreType {
+  const storeId = useSelectedStoreId();
+  const q = useQuery({
+    queryKey: ["store-type", storeId],
+    enabled: !!storeId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("stores")
+        .select("store_type")
+        .eq("id", storeId!)
+        .maybeSingle();
+      if (error) throw error;
+      return ((data as { store_type?: string } | null)?.store_type ?? "toyota") as StoreType;
+    },
+  });
+  return (q.data ?? "toyota") as StoreType;
+}
