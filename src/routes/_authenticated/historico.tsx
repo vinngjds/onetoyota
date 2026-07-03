@@ -13,12 +13,13 @@ const MONTHS = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov
 
 function Historico() {
   const storeId = useSelectedStoreId();
+  const storeType = useSelectedStoreType();
   const q = useQuery({
-    queryKey: ["hist", storeId],
+    queryKey: ["hist", storeId, storeType],
     enabled: !!storeId,
     queryFn: async () => {
       const [inds, targets, entries, bands] = await Promise.all([
-        supabase.from("indicators").select("*"),
+        supabase.from("indicators").select("*, modules!inner(store_type)").eq("modules.store_type", storeType),
         supabase.from("store_indicator_targets").select("*").eq("store_id", storeId!),
         supabase.from("indicator_entries").select("*").eq("store_id", storeId!).order("period_year", { ascending: false }).order("period_month", { ascending: false }),
         supabase.from("classification_bands").select("*"),
