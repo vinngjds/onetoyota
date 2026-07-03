@@ -85,14 +85,30 @@ function GestaoIndicadores() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["gestao-indicadores"] }),
   });
 
+  const [typeFilter, setTypeFilter] = useState<"all" | "toyota" | "lexus">("all");
+
   if (q.isLoading || !q.data) return <div className="text-slate-500">Carregando...</div>;
   const { modules, indicators } = q.data;
+  const filteredModules = modules.filter((m: any) => typeFilter === "all" || m.store_type === typeFilter);
 
   return (
     <div className="space-y-6 max-w-6xl">
-      <div>
-        <h1 className="text-2xl font-bold">Catálogo de indicadores</h1>
-        <p className="text-slate-500">Gerencie os indicadores de cada módulo e defina metas padrão.</p>
+      <div className="flex items-end justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold">Catálogo de indicadores</h1>
+          <p className="text-slate-500">Gerencie os indicadores de cada módulo e defina metas padrão.</p>
+        </div>
+        <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
+          {(["all", "toyota", "lexus"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTypeFilter(t)}
+              className={`px-3 py-1.5 text-sm rounded-md transition ${typeFilter === t ? "bg-white shadow font-semibold" : "text-slate-500 hover:text-slate-700"}`}
+            >
+              {t === "all" ? "Todos" : t === "toyota" ? "Toyota" : "Lexus"}
+            </button>
+          ))}
+        </div>
       </div>
 
       <Card className="p-5">
