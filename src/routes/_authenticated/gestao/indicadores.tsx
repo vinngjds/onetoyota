@@ -119,7 +119,7 @@ function GestaoIndicadores() {
             <Select value={form.module_id} onValueChange={(v) => setForm({ ...form, module_id: v })}>
               <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
               <SelectContent>
-                {modules.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
+                {filteredModules.map((m: any) => <SelectItem key={m.id} value={m.id}>{m.name} {m.store_type === "lexus" ? "(Lexus)" : "(Toyota)"}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
