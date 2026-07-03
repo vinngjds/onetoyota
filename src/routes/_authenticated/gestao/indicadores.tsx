@@ -160,11 +160,14 @@ function GestaoIndicadores() {
         </div>
       </Card>
 
-      {modules.map((m) => {
+      {filteredModules.map((m: any) => {
         const list = indicators.filter((i) => i.module_id === m.id);
         return (
           <Card key={m.id} className="p-0 overflow-hidden">
-            <div className="px-5 py-3 border-b font-semibold" style={{ color: m.color }}>{m.name}</div>
+            <div className="px-5 py-3 border-b font-semibold flex items-center justify-between" style={{ color: m.color }}>
+              <span>{m.name}</span>
+              <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600">{m.store_type === "lexus" ? "Lexus" : "Toyota"}</span>
+            </div>
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-xs uppercase text-slate-500 border-b">
