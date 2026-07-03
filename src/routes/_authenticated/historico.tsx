@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useSelectedStoreId } from "@/lib/session";
+import { useSelectedStoreId, useSelectedStoreType } from "@/lib/session";
 import { Card } from "@/components/ui/card";
 import { classifyScore, resolveTarget, pointsFrom, type Indicator, type TargetRow } from "@/lib/scoring";
 
