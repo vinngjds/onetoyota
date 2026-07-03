@@ -69,20 +69,23 @@ function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden"
-         style={{ background: "linear-gradient(135deg, #4C6EF5 0%, #7B8FF8 60%, #B4C0FA 100%)" }}>
+         style={{ background: "linear-gradient(135deg, #C00000 0%, #E63946 60%, #F4A6AC 100%)" }}>
       <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-white/10 blur-3xl" />
       <div className="absolute -bottom-32 -right-16 w-96 h-96 rounded-full bg-white/10 blur-3xl" />
       <div className="absolute top-1/3 right-1/4 w-40 h-40 rounded-full bg-white/20 blur-2xl" />
 
       <div className="w-full max-w-md relative">
-        <div className="text-center mb-6 text-white">
+        <div className="flex flex-col items-center mb-6 text-white">
+          <div className="bg-white/90 rounded-2xl p-4 shadow-lg mb-4">
+            <img src={toyotaLogo.url} alt="Toyota" className="h-16 w-auto" />
+          </div>
           <h1 className="text-3xl font-bold">Kuruma Indicadores</h1>
-          <p className="text-white/80 mt-2 text-sm">
+          <p className="text-white/90 mt-2 text-sm">
             Controle de metas e desempenho das lojas
           </p>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-2xl p-8">
+        <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-8">
           <Tabs defaultValue="signin">
             <TabsList className="grid grid-cols-2 mb-6 w-full">
               <TabsTrigger value="signin">Entrar</TabsTrigger>
