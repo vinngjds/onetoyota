@@ -1,15 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentUser } from "@/lib/session";
+import { useCurrentUser, useIsGestao } from "@/lib/session";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { pctReal, pointsFrom, resolveTarget, deliveryStatus, type Indicator, type TargetRow, type DeliveryStatus } from "@/lib/scoring";
 import { toast } from "sonner";
 
 function fmtPct(v: number | null | undefined) {
   if (v == null) return "-";
   return `${(v * 100).toFixed(1)}%`;
+}
+
+function fmtDateTime(v: string | null | undefined) {
+  if (!v) return "-";
+  const d = new Date(v);
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
 export function ModuleSection({
@@ -28,6 +36,7 @@ export function ModuleSection({
   statusFilter?: "all" | DeliveryStatus;
 }) {
   const userId = useCurrentUser();
+  const { isGestao } = useIsGestao();
   const qc = useQueryClient();
   const key = ["module-section", moduleSlug, storeId, year, month];
 
@@ -37,7 +46,7 @@ export function ModuleSection({
       const modRes = await supabase.from("modules").select("*").eq("slug", moduleSlug).single();
       if (modRes.error) throw modRes.error;
       const module_id = modRes.data.id;
-      const [inds, targets, entries] = await Promise.all([
+      const [inds, targets, entries, profiles] = await Promise.all([
         supabase.from("indicators").select("*").eq("module_id", module_id).order("sort_order"),
         supabase.from("store_indicator_targets").select("*").eq("store_id", storeId),
         supabase
@@ -46,12 +55,14 @@ export function ModuleSection({
           .eq("store_id", storeId)
           .eq("period_year", year)
           .eq("period_month", month),
+        supabase.from("profiles").select("id, full_name"),
       ]);
       return {
         module: modRes.data,
         indicators: (inds.data ?? []) as Indicator[],
         targets: targets.data ?? [],
         entries: entries.data ?? [],
+        profiles: profiles.data ?? [],
       };
     },
   });
@@ -71,19 +82,24 @@ export function ModuleSection({
           realizado: payload.realizado ?? null,
           projecao: payload.projecao ?? null,
           updated_by: userId,
+          updated_at: new Date().toISOString(),
         },
         { onConflict: "store_id,indicator_id,period_year,period_month" },
       );
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: key }),
+    onSuccess: () => {
+      toast.success("Registro salvo");
+      qc.invalidateQueries({ queryKey: key });
+    },
     onError: (e: any) => toast.error(e.message ?? "Erro ao salvar"),
   });
 
   if (q.isLoading || !q.data) return <div className="text-slate-500 text-sm">Carregando...</div>;
 
-  const { module: mod, indicators, targets, entries } = q.data;
+  const { module: mod, indicators, targets, entries, profiles } = q.data;
   const entryMap = new Map(entries.map((e) => [e.indicator_id, e]));
+  const nameById = new Map((profiles as any[]).map((p) => [p.id, p.full_name]));
 
   const groups = new Map<string, Indicator[]>();
   indicators.forEach((ind) => {
@@ -126,17 +142,17 @@ export function ModuleSection({
             <p className="text-slate-500 text-sm">Preencha o Realizado e a Projeção de cada indicador.</p>
           )}
         </div>
-        <Card className="p-3 flex gap-6">
+        <Card className="p-3 flex gap-6 items-end">
           <div>
-            <div className="text-xs text-slate-500">Realizado</div>
-            <div className="text-lg font-bold">
-              {totalReal.toFixed(2)}{" "}
+            <div className="text-xs text-slate-500 uppercase tracking-wide">Projeção</div>
+            <div className="text-2xl font-bold">
+              {totalProj.toFixed(2)}{" "}
               <span className="text-xs text-slate-400">/ {totalMax.toFixed(2)}</span>
             </div>
           </div>
           <div>
-            <div className="text-xs text-slate-500">Projeção</div>
-            <div className="text-lg font-bold">{totalProj.toFixed(2)}</div>
+            <div className="text-xs text-slate-500">Realizado</div>
+            <div className="text-sm font-semibold text-slate-600">{totalReal.toFixed(2)}</div>
           </div>
         </Card>
       </div>
@@ -159,6 +175,8 @@ export function ModuleSection({
                   <th className="px-3 py-2 w-24 text-right">% Real</th>
                   <th className="px-3 py-2 w-24 text-right">Real (pts)</th>
                   <th className="px-3 py-2 w-32">Projeção</th>
+                  <th className="px-3 py-2 w-20">Ação</th>
+                  {isGestao && <th className="px-3 py-2 w-48">Última atualização</th>}
                 </tr>
               </thead>
               <tbody>
@@ -172,6 +190,10 @@ export function ModuleSection({
                       target={t}
                       realizado={e?.realizado != null ? Number(e.realizado) : null}
                       projecao={e?.projecao != null ? Number(e.projecao) : null}
+                      showLog={isGestao}
+                      updatedAt={(e as any)?.updated_at ?? null}
+                      updatedByName={(e as any)?.updated_by ? nameById.get((e as any).updated_by) ?? null : null}
+                      saving={upsertEntry.isPending}
                       onSave={(patch) => upsertEntry.mutate({ indicator_id: ind.id, ...patch })}
                     />
                   );
@@ -191,12 +213,20 @@ function IndicatorRow({
   realizado,
   projecao,
   onSave,
+  showLog,
+  updatedAt,
+  updatedByName,
+  saving,
 }: {
   indicator: Indicator;
   target: number;
   realizado: number | null;
   projecao: number | null;
   onSave: (patch: { realizado?: number | null; projecao?: number | null }) => void;
+  showLog: boolean;
+  updatedAt: string | null;
+  updatedByName: string | null;
+  saving: boolean;
 }) {
   const [realStr, setRealStr] = useState(realizado != null ? String(realizado) : "");
   const [projStr, setProjStr] = useState(projecao != null ? String(projecao) : "");
@@ -215,6 +245,10 @@ function IndicatorRow({
         ? "bg-yellow-400/10"
         : "bg-red-500/10";
 
+  const dirty =
+    realStr !== (realizado != null ? String(realizado) : "") ||
+    projStr !== (projecao != null ? String(projecao) : "");
+
   const unitSuffix =
     indicator.unit === "percent"
       ? "%"
@@ -224,9 +258,14 @@ function IndicatorRow({
           ? "0/1"
           : "";
 
+  const save = () =>
+    onSave({
+      realizado: realStr === "" ? null : Number(realStr),
+      projecao: projStr === "" ? null : Number(projStr),
+    });
+
   return (
     <tr className={`border-b last:border-b-0 ${rowBg} hover:brightness-95 transition`}>
-
       <td className="px-5 py-2 font-medium">{indicator.name}</td>
       <td className="px-3 py-2 text-right">{Number(indicator.max_points).toFixed(2)}</td>
       <td className="px-3 py-2 text-right text-slate-600">
@@ -239,12 +278,6 @@ function IndicatorRow({
           type="number"
           step="any"
           onChange={(e) => setRealStr(e.target.value)}
-          onBlur={() =>
-            onSave({
-              realizado: realStr === "" ? null : Number(realStr),
-              projecao: projStr === "" ? null : Number(projStr),
-            })
-          }
         />
       </td>
       <td className="px-3 py-2 text-right font-medium">{fmtPct(p)}</td>
@@ -256,14 +289,25 @@ function IndicatorRow({
           type="number"
           step="any"
           onChange={(e) => setProjStr(e.target.value)}
-          onBlur={() =>
-            onSave({
-              realizado: realStr === "" ? null : Number(realStr),
-              projecao: projStr === "" ? null : Number(projStr),
-            })
-          }
         />
       </td>
+      <td className="px-3 py-2">
+        <Button size="sm" className="h-8" variant={dirty ? "default" : "outline"} disabled={saving} onClick={save}>
+          Salvar
+        </Button>
+      </td>
+      {showLog && (
+        <td className="px-3 py-2 text-xs text-slate-500">
+          {updatedAt ? (
+            <>
+              <div>{fmtDateTime(updatedAt)}</div>
+              {updatedByName && <div className="text-slate-400">{updatedByName}</div>}
+            </>
+          ) : (
+            "-"
+          )}
+        </td>
+      )}
     </tr>
   );
 }
