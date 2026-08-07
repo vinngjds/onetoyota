@@ -120,16 +120,17 @@ function LojaGestao() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="p-5 border-slate-300">
+          <div className="text-xs uppercase tracking-wide text-slate-500">Projeção</div>
+          <div className="text-4xl font-extrabold mt-2">{proj.toFixed(2)}</div>
+          <div className="text-xs text-slate-500 mt-1">de {max.toFixed(2)} pontos</div>
+        </Card>
         <Card className="p-5">
           <div className="text-xs uppercase tracking-wide text-slate-500">Realizado</div>
-          <div className="text-3xl font-bold mt-2">{real.toFixed(2)}</div>
+          <div className="text-2xl font-semibold mt-2 text-slate-600">{real.toFixed(2)}</div>
           <div className="text-xs text-slate-500 mt-1">de {max.toFixed(2)} pontos</div>
         </Card>
-        <Card className="p-5">
-          <div className="text-xs uppercase tracking-wide text-slate-500">Projeção</div>
-          <div className="text-3xl font-bold mt-2">{proj.toFixed(2)}</div>
-          <div className="text-xs text-slate-500 mt-1">de {max.toFixed(2)} pontos</div>
-        </Card>
+
         <Card className="p-5">
           <div className="text-xs uppercase tracking-wide text-slate-500">Classificação</div>
           <div className="flex items-baseline gap-3 mt-2">
